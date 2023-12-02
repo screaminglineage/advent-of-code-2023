@@ -1,7 +1,6 @@
-use std::{collections::HashMap, fs};
+use std::fs;
 
 const DATA_FILE: &str = "data.txt";
-const TEST_DATA_FILE: &str = "test_data.txt";
 
 const GREEN_MAX: u8 = 13;
 const RED_MAX: u8 = 12;
@@ -54,6 +53,7 @@ fn part1(data: &str) -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    const TEST_DATA_FILE: &str = "test_data.txt";
 
     fn load_file() -> String {
         fs::read_to_string(TEST_DATA_FILE).unwrap()

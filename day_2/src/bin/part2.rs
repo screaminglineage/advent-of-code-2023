@@ -1,7 +1,6 @@
 use std::{collections::HashMap, fs};
 
 const DATA_FILE: &str = "data.txt";
-const TEST_DATA_FILE: &str = "test_data.txt";
 
 fn main() {
     let input = fs::read_to_string(DATA_FILE).unwrap();
@@ -47,6 +46,7 @@ fn part2(data: &str) -> u32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    const TEST_DATA_FILE: &str = "test_data.txt";
 
     fn load_file() -> String {
         fs::read_to_string(TEST_DATA_FILE).unwrap()
