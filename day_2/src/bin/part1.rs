@@ -19,20 +19,20 @@ fn game_is_valid(game: &str) -> bool {
         .iter()
         .map(|round| {
             let cubes: Vec<&str> = round.split(", ").collect();
-            let mut cube_amount: HashMap<&str, u8> = HashMap::new();
-            for cube in cubes {
-                let num = cube.split(' ').next().unwrap();
-                let colour = cube.split(' ').last().unwrap();
-                cube_amount.insert(colour, num.parse::<u8>().unwrap());
-            }
-            if cube_amount.get("red").unwrap_or(&0) > &RED_MAX
-                || cube_amount.get("blue").unwrap_or(&0) > &BLUE_MAX
-                || cube_amount.get("green").unwrap_or(&0) > &GREEN_MAX
-            {
-                false
-            } else {
-                true
-            }
+            cubes
+                .iter()
+                .map(|cube| {
+                    let num = cube.split(' ').next().unwrap();
+                    let colour = cube.split(' ').last().unwrap();
+                    (num.parse::<u8>().unwrap(), colour)
+                })
+                .map(|(num, colour)| match colour {
+                    "red" if num <= RED_MAX => true,
+                    "green" if num <= GREEN_MAX => true,
+                    "blue" if num <= BLUE_MAX => true,
+                    _ => false,
+                })
+                .all(|x| x)
         })
         .all(|x| x)
 }
