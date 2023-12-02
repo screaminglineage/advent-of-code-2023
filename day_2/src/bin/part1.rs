@@ -23,14 +23,14 @@ fn game_is_valid(game: &str) -> bool {
                 .iter()
                 .map(|cube| {
                     let num = cube.split(' ').next().unwrap();
+                    let num = num.parse::<u8>().unwrap();
                     let colour = cube.split(' ').last().unwrap();
-                    (num.parse::<u8>().unwrap(), colour)
-                })
-                .map(|(num, colour)| match colour {
-                    "red" if num <= RED_MAX => true,
-                    "green" if num <= GREEN_MAX => true,
-                    "blue" if num <= BLUE_MAX => true,
-                    _ => false,
+                    match colour {
+                        "red" if num <= RED_MAX => true,
+                        "green" if num <= GREEN_MAX => true,
+                        "blue" if num <= BLUE_MAX => true,
+                        _ => false,
+                    }
                 })
                 .all(|x| x)
         })
@@ -42,7 +42,6 @@ fn part1(data: &str) -> u32 {
         .enumerate()
         .filter_map(|(i, game)| {
             let start = game.find(": ").unwrap();
-            println!("");
             if game_is_valid(&game[start + 2..]) {
                 Some((i + 1) as u32)
             } else {
