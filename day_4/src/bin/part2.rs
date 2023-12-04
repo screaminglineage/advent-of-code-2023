@@ -2,7 +2,6 @@ use std::collections::{HashMap, VecDeque};
 use std::fs;
 
 const DATA_FILE: &str = "data.txt";
-const MAX_CARD: u32 = 219;
 
 fn main() {
     let input = fs::read_to_string(DATA_FILE).unwrap();
