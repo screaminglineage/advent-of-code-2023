@@ -64,6 +64,7 @@ fn get_win_count(card: &Card) -> u32 {
 fn part2(data: &str) -> u32 {
     let mut cards: HashMap<u32, Card> = HashMap::new();
     let mut cards_to_process: VecDeque<u32> = VecDeque::new();
+
     for card in data.lines() {
         let card = parse_card(card);
         let win_count = get_win_count(&card);
