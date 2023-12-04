@@ -8,8 +8,36 @@ fn main() {
     println!("Part 1: {output}");
 }
 
-fn part1(data: &str) -> String {
-    String::new()
+fn nums_from_line<'a, I: Iterator<Item = &'a str>>(nums_it: &mut I) -> Vec<u32> {
+    nums_it
+        .next()
+        .unwrap()
+        .split_whitespace()
+        .map(|n| n.parse::<u32>().unwrap())
+        .collect::<Vec<u32>>()
+}
+
+fn part1(data: &str) -> u32 {
+    data.lines()
+        .map(|card| {
+            let nums = card.split(": ").last().unwrap();
+            let mut nums_it = nums.split("| ").into_iter();
+            let card_nums = nums_from_line(&mut nums_it);
+            let winnning_nums = nums_from_line(&mut nums_it);
+            println!("{card_nums:?} {winnning_nums:?}\n");
+
+            let win_count = card_nums
+                .iter()
+                .filter(|num| winnning_nums.contains(num))
+                .count() as u32;
+
+            if win_count == 0 {
+                0
+            } else {
+                2u32.pow(win_count - 1)
+            }
+        })
+        .sum()
 }
 
 #[cfg(test)]
@@ -26,6 +54,6 @@ mod tests {
         let data = load_file();
         let output = part1(&data);
 
-        assert_eq!(output, "");
+        assert_eq!(output, 13);
     }
 }
