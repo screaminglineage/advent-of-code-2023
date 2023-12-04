@@ -31,54 +31,65 @@ fn get_card_num(card_line: &str) -> u32 {
         .unwrap()
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 struct Card {
     card_id: u32,
-    card_nums: Vec<u32>,
-    winnning_nums: Vec<u32>,
+    win_count: u32,
     count: u32,
 }
 
-fn parse_card(card_line: &str) -> Card {
+#[derive(Debug, Clone)]
+struct ParsedLine {
+    card: Card,
+    card_nums: Vec<u32>,
+    winnning_nums: Vec<u32>,
+}
+
+fn parse_card(card_line: &str) -> ParsedLine {
     let card_id = get_card_num(card_line);
     let nums = card_line.split(": ").last().unwrap();
     let mut nums_it = nums.split("| ").into_iter();
     let card_nums = nums_from_line(&mut nums_it);
     let winnning_nums = nums_from_line(&mut nums_it);
-    Card {
-        card_id,
+    ParsedLine {
+        card: Card {
+            card_id,
+            win_count: 0,
+            count: 1,
+        },
         card_nums,
         winnning_nums,
-        count: 1,
     }
 }
 
-fn get_win_count(card: &Card) -> u32 {
-    card.card_nums
+fn get_win_count(card_line: &ParsedLine) -> u32 {
+    card_line
+        .card_nums
         .iter()
-        .filter(|num| card.winnning_nums.contains(num))
+        .filter(|num| card_line.winnning_nums.contains(num))
         .count() as u32
 }
 
-// damn this is so slow
 fn part2(data: &str) -> u32 {
     let mut cards: HashMap<u32, Card> = HashMap::new();
     let mut cards_to_process: VecDeque<u32> = VecDeque::new();
 
     for card in data.lines() {
-        let card = parse_card(card);
-        let win_count = get_win_count(&card);
-        cards.insert(card.card_id, card.clone());
+        let card_line = parse_card(card);
+        let mut card = card_line.card;
+        card.win_count = get_win_count(&card_line);
 
-        let cards_won = card.card_id + 1..card.card_id + win_count + 1;
+        cards.insert(card.card_id, card);
+
+        let cards_won = card.card_id + 1..card.card_id + card.win_count + 1;
         cards_to_process.extend(cards_won);
     }
 
     while !cards_to_process.is_empty() {
         let card_id = cards_to_process.pop_front().unwrap();
         let card = cards.get(&card_id).unwrap();
+        let win_count = card.win_count;
 
-        let win_count = get_win_count(&card);
         cards.entry(card_id).and_modify(|card| card.count += 1);
 
         let cards_won = card_id + 1..card_id + win_count + 1;
