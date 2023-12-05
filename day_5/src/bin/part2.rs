@@ -44,13 +44,23 @@ fn get_ranges(line: &str) -> Vec<RangeMap> {
 }
 
 fn get_seeds(data: &[&str]) -> Vec<u64> {
-    data.get(0)
+    let seed_ranges: Vec<u64> = data
+        .get(0)
         .unwrap()
         .split(": ")
         .last()
         .unwrap()
         .split_whitespace()
         .map(|s| s.parse::<u64>().unwrap())
+        .collect();
+
+    seed_ranges
+        .chunks(2)
+        .flat_map(|seed| {
+            let start = seed[0];
+            let length = seed[1];
+            (start..start + length)
+        })
         .collect()
 }
 
@@ -72,7 +82,7 @@ fn part2(data: &str) -> u64 {
     let mut data_lines: Vec<&str> = data.split("\n\n").collect();
     let seeds = get_seeds(&data_lines);
     let data_lines: Vec<&str> = data_lines.drain(1..).collect();
-    dbg!(&seeds);
+    dbg!(seeds.len());
 
     let mut maps: HashMap<&str, Vec<RangeMap>> = HashMap::new();
     for line in data_lines {
@@ -91,17 +101,18 @@ fn part2(data: &str) -> u64 {
         "humidity-to-location map",
     ];
 
-    seeds
-        .iter()
-        .map(|seed| {
-            let mut location = *seed;
-            for map in &map_order {
-                location = map_items(location, &maps, map);
-            }
-            location
-        })
-        .min()
-        .unwrap()
+    // seeds
+    //     .iter()
+    //     .map(|seed| {
+    //         let mut location = *seed;
+    //         for map in &map_order {
+    //             location = map_items(location, &maps, map);
+    //         }
+    //         location
+    //     })
+    //     .min()
+    //     .unwrap()
+    0
 }
 
 #[cfg(test)]
