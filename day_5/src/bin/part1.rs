@@ -10,11 +10,11 @@ fn main() {
 
 #[derive(Debug)]
 struct RangeMap {
-    source: Range<u32>,
-    dest: Range<u32>,
+    source: Range<u64>,
+    dest: Range<u64>,
 }
 
-fn range_from_nums(nums: Vec<u32>) -> Vec<RangeMap> {
+fn range_from_nums(nums: Vec<u64>) -> Vec<RangeMap> {
     nums.chunks(3)
         .map(|num| {
             let dest_start = num[0];
@@ -36,25 +36,25 @@ fn range_from_nums(nums: Vec<u32>) -> Vec<RangeMap> {
 }
 
 fn get_ranges(line: &str) -> Vec<RangeMap> {
-    let num_ranges: Vec<u32> = line
+    let num_ranges: Vec<u64> = line
         .split('\n')
-        .flat_map(|nums| nums.split_whitespace().map(|n| n.parse::<u32>().unwrap()))
+        .flat_map(|nums| nums.split_whitespace().map(|n| n.parse::<u64>().unwrap()))
         .collect();
     range_from_nums(num_ranges)
 }
 
-fn get_seeds(data: &[&str]) -> Vec<u32> {
+fn get_seeds(data: &[&str]) -> Vec<u64> {
     data.get(0)
         .unwrap()
         .split(": ")
         .last()
         .unwrap()
         .split_whitespace()
-        .map(|s| s.parse::<u32>().unwrap())
+        .map(|s| s.parse::<u64>().unwrap())
         .collect()
 }
 
-fn map_items(item: u32, maps: &HashMap<&str, Vec<RangeMap>>, map: &str) -> u32 {
+fn map_items(item: u64, maps: &HashMap<&str, Vec<RangeMap>>, map: &str) -> u64 {
     let map_ranges = maps.get(map).unwrap();
 
     if let Some(range) = map_ranges
@@ -62,17 +62,13 @@ fn map_items(item: u32, maps: &HashMap<&str, Vec<RangeMap>>, map: &str) -> u32 {
         .filter(|range| range.source.contains(&item))
         .next()
     {
-        dbg!(range);
+        return (item as i64 - (range.source.start as i64 - range.dest.start as i64)) as u64;
     } else {
-        println!("not found");
+        return item;
     }
-
-    dbg!(map_ranges);
-
-    todo!()
 }
 
-fn part1(data: &str) -> u32 {
+fn part1(data: &str) -> u64 {
     let mut data_lines: Vec<&str> = data.split("\n\n").collect();
     let seeds = get_seeds(&data_lines);
     let data_lines: Vec<&str> = data_lines.drain(1..).collect();
@@ -95,7 +91,7 @@ fn part1(data: &str) -> u32 {
         "humidity-to-location map",
     ];
 
-    let final_locations: Vec<u32> = seeds
+    seeds
         .iter()
         .map(|seed| {
             let mut location = *seed;
@@ -104,11 +100,8 @@ fn part1(data: &str) -> u32 {
             }
             location
         })
-        .collect();
-
-    // dbg!(maps);
-    // dbg!(final_locations);
-    0
+        .min()
+        .unwrap()
 }
 
 #[cfg(test)]
