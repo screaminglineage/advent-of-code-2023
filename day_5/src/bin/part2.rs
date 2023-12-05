@@ -43,7 +43,7 @@ fn get_ranges(line: &str) -> Vec<RangeMap> {
     range_from_nums(num_ranges)
 }
 
-fn get_seeds(data: &[&str]) -> Vec<u64> {
+fn get_seeds(data: &[&str]) -> Vec<Range<u64>> {
     let seed_ranges: Vec<u64> = data
         .get(0)
         .unwrap()
@@ -56,10 +56,10 @@ fn get_seeds(data: &[&str]) -> Vec<u64> {
 
     seed_ranges
         .chunks(2)
-        .flat_map(|seed| {
+        .map(|seed| {
             let start = seed[0];
             let length = seed[1];
-            (start..start + length)
+            start..start + length
         })
         .collect()
 }
@@ -78,11 +78,12 @@ fn map_items(item: u64, maps: &HashMap<&str, Vec<RangeMap>>, map: &str) -> u64 {
     }
 }
 
+// terrible brute force solution that takes almost 11 mins to finish
 fn part2(data: &str) -> u64 {
+    println!("Started Program");
     let mut data_lines: Vec<&str> = data.split("\n\n").collect();
     let seeds = get_seeds(&data_lines);
     let data_lines: Vec<&str> = data_lines.drain(1..).collect();
-    dbg!(seeds.len());
 
     let mut maps: HashMap<&str, Vec<RangeMap>> = HashMap::new();
     for line in data_lines {
@@ -101,18 +102,20 @@ fn part2(data: &str) -> u64 {
         "humidity-to-location map",
     ];
 
-    // seeds
-    //     .iter()
-    //     .map(|seed| {
-    //         let mut location = *seed;
-    //         for map in &map_order {
-    //             location = map_items(location, &maps, map);
-    //         }
-    //         location
-    //     })
-    //     .min()
-    //     .unwrap()
-    0
+    let mut locations = Vec::new();
+    for seed_range in seeds {
+        for seed in seed_range {
+            let mut location = seed;
+            for map in &map_order {
+                location = map_items(location, &maps, map);
+            }
+            locations.push(location);
+        }
+        let min = *locations.iter().min().unwrap();
+        locations.clear();
+        locations.push(min);
+    }
+    *locations.iter().min().unwrap()
 }
 
 #[cfg(test)]
