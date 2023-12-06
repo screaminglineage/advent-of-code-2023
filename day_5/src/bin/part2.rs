@@ -79,14 +79,12 @@ fn map_items(item: u64, maps: &HashMap<&str, Vec<RangeMap>>, map: &str) -> u64 {
     }
 }
 
-// terrible brute force solution that takes almost 11 mins to finish
+// terrible brute force solution that is extremely slow even with rayon parellelisation
 fn part2(data: &str) -> u64 {
     println!("Started Program");
     let mut data_lines: Vec<&str> = data.split("\n\n").collect();
     let seeds = get_seeds(&data_lines);
     let data_lines: Vec<&str> = data_lines.drain(1..).collect();
-
-    println!("seeds loaded");
 
     let mut maps: HashMap<&str, Vec<RangeMap>> = HashMap::new();
     for line in data_lines {
@@ -95,8 +93,6 @@ fn part2(data: &str) -> u64 {
         let ranges = get_ranges(ranges);
         maps.insert(map_name, ranges);
     }
-
-    println!("Parsing Complete");
 
     let map_order = vec![
         "seed-to-soil map",
@@ -107,8 +103,6 @@ fn part2(data: &str) -> u64 {
         "temperature-to-humidity map",
         "humidity-to-location map",
     ];
-
-    println!("Beginning Ordeal");
 
     seeds
         .into_par_iter()
