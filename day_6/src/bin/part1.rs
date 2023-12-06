@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, iter::zip};
 
 const DATA_FILE: &str = "data.txt";
 
@@ -8,8 +8,37 @@ fn main() {
     println!("Part 1: {output}");
 }
 
-fn part1(data: &str) -> String {
-    String::new()
+fn line_to_nums(line: &str) -> Vec<u32> {
+    line.split(":")
+        .last()
+        .unwrap()
+        .split_whitespace()
+        .map(|n| n.parse::<u32>().unwrap())
+        .collect()
+}
+
+fn part1(data: &str) -> u32 {
+    let lines: Vec<&str> = data.lines().collect();
+    let times = line_to_nums(lines[0]);
+    let distances = line_to_nums(lines[1]);
+    println!("{:?}", times);
+    println!("{:?}", distances);
+
+    let mut total: u32 = 1;
+    for (time, dist) in zip(times, distances) {
+        let mut winning_dists = Vec::new();
+        for i in 1..time {
+            let speed = i;
+            let time_left = time - i;
+            let my_dist = speed * time_left;
+            if my_dist > dist {
+                winning_dists.push(my_dist);
+            }
+        }
+        total *= winning_dists.len() as u32
+    }
+
+    total
 }
 
 #[cfg(test)]
@@ -26,6 +55,6 @@ mod tests {
         let data = load_file();
         let output = part1(&data);
 
-        assert_eq!(output, "");
+        assert_eq!(output, 288);
     }
 }
