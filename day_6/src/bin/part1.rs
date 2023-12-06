@@ -21,8 +21,6 @@ fn part1(data: &str) -> u32 {
     let lines: Vec<&str> = data.lines().collect();
     let times = line_to_nums(lines[0]);
     let distances = line_to_nums(lines[1]);
-    println!("{:?}", times);
-    println!("{:?}", distances);
 
     let mut total: u32 = 1;
     for (time, dist) in zip(times, distances) {
@@ -37,8 +35,29 @@ fn part1(data: &str) -> u32 {
         }
         total *= winning_dists.len() as u32
     }
-
     total
+}
+
+// alternate version using functional style
+fn part1_alternate(data: &str) -> u32 {
+    let lines: Vec<&str> = data.lines().collect();
+    let times = line_to_nums(lines[0]);
+    let distances = line_to_nums(lines[1]);
+
+    zip(times, distances)
+        .into_iter()
+        .map(|(time, dist)| {
+            (1..time)
+                .filter(|i| {
+                    let speed = i;
+                    let time_left = time - i;
+                    let my_dist = speed * time_left;
+                    my_dist > dist
+                })
+                .collect::<Vec<u32>>()
+                .len() as u32
+        })
+        .product::<u32>()
 }
 
 #[cfg(test)]
