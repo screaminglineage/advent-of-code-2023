@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use std::{collections::HashMap, fs, ops::Range};
 
 const DATA_FILE: &str = "data.txt";
@@ -85,6 +86,8 @@ fn part2(data: &str) -> u64 {
     let seeds = get_seeds(&data_lines);
     let data_lines: Vec<&str> = data_lines.drain(1..).collect();
 
+    println!("seeds loaded");
+
     let mut maps: HashMap<&str, Vec<RangeMap>> = HashMap::new();
     for line in data_lines {
         let map_name = line.split(":\n").next().unwrap();
@@ -92,6 +95,9 @@ fn part2(data: &str) -> u64 {
         let ranges = get_ranges(ranges);
         maps.insert(map_name, ranges);
     }
+
+    println!("Parsing Complete");
+
     let map_order = vec![
         "seed-to-soil map",
         "soil-to-fertilizer map",
@@ -102,20 +108,22 @@ fn part2(data: &str) -> u64 {
         "humidity-to-location map",
     ];
 
-    let mut locations = Vec::new();
-    for seed_range in seeds {
-        for seed in seed_range {
-            let mut location = seed;
-            for map in &map_order {
-                location = map_items(location, &maps, map);
-            }
-            locations.push(location);
-        }
-        let min = *locations.iter().min().unwrap();
-        locations.clear();
-        locations.push(min);
-    }
-    *locations.iter().min().unwrap()
+    println!("Beginning Ordeal");
+
+    seeds
+        .into_par_iter()
+        .flat_map(|seed_range| {
+            seed_range
+                .into_par_iter()
+                .map(|seed| {
+                    map_order
+                        .iter()
+                        .fold(seed, |acc, map| map_items(acc, &maps, map))
+                })
+                .min()
+        })
+        .min()
+        .unwrap()
 }
 
 #[cfg(test)]
