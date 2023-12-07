@@ -71,64 +71,33 @@ fn part1(data: &str) -> u32 {
         })
         .collect();
 
-    let mut five_of_kinds: Vec<&Hand> = hands
-        .iter()
-        .filter(|hand| {
-            let card_count = count_cards(&hand.cards);
-            card_count.values().any(|c| *c == 5)
-        })
-        .collect();
+    let mut five_of_kinds = Vec::new();
+    let mut four_of_kinds = Vec::new();
+    let mut three_of_kinds = Vec::new();
+    let mut full_houses = Vec::new();
+    let mut two_pairs = Vec::new();
+    let mut one_pairs = Vec::new();
+    let mut high_cards = Vec::new();
 
-    let mut four_of_kinds: Vec<&Hand> = hands
-        .iter()
-        .filter(|hand| {
-            let card_count = count_cards(&hand.cards);
-            card_count.values().any(|c| *c == 4)
-        })
-        .collect();
+    for hand in hands.iter() {
+        let card_count = count_cards(&hand.cards);
 
-    let mut full_houses: Vec<&Hand> = hands
-        .iter()
-        .filter(|hand| {
-            let card_count = count_cards(&hand.cards);
-            card_count.values().any(|c| *c == 3)
-                && card_count.values().filter(|c| **c != 3).all(|c| *c == 2)
-        })
-        .collect();
-
-    let mut three_of_kinds: Vec<&Hand> = hands
-        .iter()
-        .filter(|hand| {
-            let card_count = count_cards(&hand.cards);
-            card_count.values().any(|c| *c == 3)
-                && card_count.values().filter(|c| **c != 3).all(|c| *c == 1)
-        })
-        .collect();
-
-    let mut two_pairs: Vec<&Hand> = hands
-        .iter()
-        .filter(|hand| {
-            let card_count = count_cards(&hand.cards);
-            card_count.values().filter(|c| **c == 2).count() == 2
-        })
-        .collect();
-
-    let mut one_pairs: Vec<&Hand> = hands
-        .iter()
-        .filter(|hand| {
-            let card_count = count_cards(&hand.cards);
-            card_count.values().filter(|c| **c == 2).count() == 1
-                && card_count.values().filter(|c| **c == 1).count() == 3
-        })
-        .collect();
-
-    let mut high_cards: Vec<&Hand> = hands
-        .iter()
-        .filter(|hand| {
-            let card_count = count_cards(&hand.cards);
-            card_count.values().all(|c| *c == 1)
-        })
-        .collect();
+        if card_count.values().any(|&x| x == 5) {
+            five_of_kinds.push(hand);
+        } else if card_count.values().any(|&x| x == 4) {
+            four_of_kinds.push(hand);
+        } else if card_count.values().any(|&x| x == 3) && card_count.values().all(|&x| x != 2) {
+            three_of_kinds.push(hand);
+        } else if card_count.values().any(|&x| x == 3) && card_count.values().any(|&x| x == 2) {
+            full_houses.push(hand);
+        } else if card_count.values().filter(|c| **c == 2).count() == 2 {
+            two_pairs.push(hand);
+        } else if card_count.values().filter(|c| **c == 2).count() == 1 {
+            one_pairs.push(hand);
+        } else {
+            high_cards.push(hand);
+        }
+    }
 
     five_of_kinds.sort();
     four_of_kinds.sort();
