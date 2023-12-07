@@ -16,6 +16,7 @@ struct Hand {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 enum Card {
+    Joker,
     Two,
     Three,
     Four,
@@ -25,7 +26,6 @@ enum Card {
     Eight,
     Nine,
     Ten,
-    Jack,
     Queen,
     King,
     Ace,
@@ -43,7 +43,7 @@ fn get_cards(hand: &str) -> Vec<Card> {
             '8' => Card::Eight,
             '9' => Card::Nine,
             'T' => Card::Ten,
-            'J' => Card::Jack,
+            'J' => Card::Joker,
             'Q' => Card::Queen,
             'K' => Card::King,
             'A' => Card::Ace,
@@ -165,6 +165,6 @@ mod tests {
         let data = load_file();
         let output = part2(&data);
 
-        assert_eq!(output, 6440);
+        assert_eq!(output, 5905);
     }
 }
