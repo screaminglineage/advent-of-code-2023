@@ -1,7 +1,5 @@
 use std::{collections::HashMap, fs};
 
-use itertools::Itertools;
-
 const DATA_FILE: &str = "data.txt";
 
 fn main() {
@@ -10,16 +8,53 @@ fn main() {
     println!("Part 1: {output}");
 }
 
-#[derive(Debug, Copy, Clone)]
-struct Hand<'a> {
-    cards: &'a str,
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+struct Hand {
+    cards: Vec<Card>,
     bid: u32,
 }
 
-fn count_cards(hand: &Hand) -> HashMap<char, u8> {
-    let mut card_count: HashMap<char, u8> = HashMap::new();
-    for card in hand.cards.chars() {
-        card_count.entry(card).and_modify(|c| *c += 1).or_insert(1);
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+enum Card {
+    Two,
+    Three,
+    Four,
+    Five,
+    Six,
+    Seven,
+    Eight,
+    Nine,
+    Ten,
+    Jack,
+    Queen,
+    King,
+    Ace,
+}
+
+fn get_cards(hand: &str) -> Vec<Card> {
+    hand.chars()
+        .map(|card| match card {
+            '2' => Card::Two,
+            '3' => Card::Three,
+            '4' => Card::Four,
+            '5' => Card::Five,
+            '6' => Card::Six,
+            '7' => Card::Seven,
+            '8' => Card::Eight,
+            '9' => Card::Nine,
+            'T' => Card::Ten,
+            'J' => Card::Jack,
+            'Q' => Card::Queen,
+            'K' => Card::King,
+            'A' => Card::Ace,
+            a => panic!("invalid card {a}"),
+        })
+        .collect()
+}
+fn count_cards(hand: &[Card]) -> HashMap<Card, u8> {
+    let mut card_count: HashMap<Card, u8> = HashMap::new();
+    for card in hand {
+        card_count.entry(*card).and_modify(|c| *c += 1).or_insert(1);
     }
     card_count
 }
@@ -30,80 +65,90 @@ fn part1(data: &str) -> u32 {
         .map(|line| {
             let line: Vec<&str> = line.split_whitespace().collect();
             Hand {
-                cards: line[0],
+                cards: get_cards(line[0].trim()),
                 bid: line[1].parse::<u32>().unwrap(),
             }
         })
         .collect();
 
-    let five_of_kinds: Vec<&Hand> = hands
+    let mut five_of_kinds: Vec<&Hand> = hands
         .iter()
         .filter(|hand| {
-            let card_count = count_cards(hand);
+            let card_count = count_cards(&hand.cards);
             card_count.values().any(|c| *c == 5)
         })
         .collect();
 
-    let four_of_kinds: Vec<&Hand> = hands
+    let mut four_of_kinds: Vec<&Hand> = hands
         .iter()
         .filter(|hand| {
-            let card_count = count_cards(hand);
+            let card_count = count_cards(&hand.cards);
             card_count.values().any(|c| *c == 4)
         })
         .collect();
 
-    let full_houses: Vec<&Hand> = hands
+    let mut full_houses: Vec<&Hand> = hands
         .iter()
         .filter(|hand| {
-            let card_count = count_cards(hand);
+            let card_count = count_cards(&hand.cards);
             card_count.values().any(|c| *c == 3)
                 && card_count.values().filter(|c| **c != 3).all(|c| *c == 2)
         })
         .collect();
 
-    let three_of_kinds: Vec<&Hand> = hands
+    let mut three_of_kinds: Vec<&Hand> = hands
         .iter()
         .filter(|hand| {
-            let card_count = count_cards(hand);
+            let card_count = count_cards(&hand.cards);
             card_count.values().any(|c| *c == 3)
                 && card_count.values().filter(|c| **c != 3).all(|c| *c == 1)
         })
         .collect();
 
-    let two_pairs: Vec<&Hand> = hands
+    let mut two_pairs: Vec<&Hand> = hands
         .iter()
         .filter(|hand| {
-            let card_count = count_cards(hand);
+            let card_count = count_cards(&hand.cards);
             card_count.values().filter(|c| **c == 2).count() == 2
         })
         .collect();
 
-    let one_pairs: Vec<&Hand> = hands
+    let mut one_pairs: Vec<&Hand> = hands
         .iter()
         .filter(|hand| {
-            let card_count = count_cards(hand);
+            let card_count = count_cards(&hand.cards);
             card_count.values().filter(|c| **c == 2).count() == 1
                 && card_count.values().filter(|c| **c == 1).count() == 3
         })
         .collect();
 
-    let high_cards: Vec<&Hand> = hands
+    let mut high_cards: Vec<&Hand> = hands
         .iter()
         .filter(|hand| {
-            let card_count = count_cards(hand);
+            let card_count = count_cards(&hand.cards);
             card_count.values().all(|c| *c == 1)
         })
         .collect();
 
-    dbg!(five_of_kinds);
-    dbg!(four_of_kinds);
-    dbg!(full_houses);
-    dbg!(three_of_kinds);
-    dbg!(two_pairs);
-    dbg!(one_pairs);
-    dbg!(high_cards);
+    five_of_kinds.sort();
+    four_of_kinds.sort();
+    full_houses.sort();
+    three_of_kinds.sort();
+    two_pairs.sort();
+    one_pairs.sort();
+    high_cards.sort();
 
-    0
+    high_cards
+        .iter()
+        .chain(one_pairs.iter())
+        .chain(two_pairs.iter())
+        .chain(three_of_kinds.iter())
+        .chain(full_houses.iter())
+        .chain(four_of_kinds.iter())
+        .chain(five_of_kinds.iter())
+        .enumerate()
+        .map(|(i, hand)| (i + 1) as u32 * hand.bid)
+        .sum()
 }
 
 #[cfg(test)]
