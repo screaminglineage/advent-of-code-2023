@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs, panic::Location};
+use std::{collections::HashMap, fs};
 
 const DATA_FILE: &str = "data.txt";
 
@@ -27,22 +27,35 @@ fn part2(data: &str) -> u32 {
         elements.insert(location, directions);
     }
 
-    let mut curr = "AAA";
-    let end = "ZZZ";
+    let mut curr: Vec<&str> = elements
+        .keys()
+        .filter(|k| k.ends_with('A'))
+        .cloned()
+        .collect();
+    let end = 'Z';
     let mut count = 0;
     let mut instruct_it = instructions.cycle();
 
     loop {
-        if curr == end {
+        if curr.iter().all(|n| n.ends_with(end)) {
             return count;
         }
 
-        let directions = elements.get(&curr).unwrap();
-        curr = match instruct_it.next() {
-            Some('L') => directions.0,
-            Some('R') => directions.1,
-            _ => unimplemented!(),
-        };
+        let next_val = instruct_it.next();
+
+        let new_nodes: Vec<&str> = curr
+            .iter()
+            .map(|node| {
+                let directions = elements.get(node).unwrap();
+                match next_val {
+                    Some('L') => directions.0,
+                    Some('R') => directions.1,
+                    _ => unimplemented!(),
+                }
+            })
+            .collect();
+
+        curr = new_nodes;
         count += 1;
     }
 }
