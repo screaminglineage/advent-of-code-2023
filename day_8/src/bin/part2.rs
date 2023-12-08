@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs};
+use std::{collections::HashMap, fs, iter::Cycle, str::Chars};
 
 const DATA_FILE: &str = "data.txt";
 
@@ -8,7 +8,44 @@ fn main() {
     println!("Part 2: {output}");
 }
 
-fn part2(data: &str) -> u32 {
+fn count_steps(
+    node: &str,
+    instruct_it: &mut Cycle<Chars<'_>>,
+    elements: &HashMap<&str, (&str, &str)>,
+) -> u64 {
+    let mut count = 0;
+    let mut curr = node;
+    loop {
+        if curr.ends_with("Z") {
+            return count;
+        }
+
+        let directions = elements.get(&curr).unwrap();
+
+        curr = match instruct_it.next() {
+            Some('L') => directions.0,
+            Some('R') => directions.1,
+            _ => unimplemented!(),
+        };
+        count += 1;
+    }
+}
+
+fn hcf(a: u64, b: u64) -> u64 {
+    if b == 0 {
+        a
+    } else {
+        hcf(b, a % b)
+    }
+}
+
+fn lcm(nums: Vec<u64>) -> u64 {
+    nums.iter()
+        .skip(1)
+        .fold(nums[0], |acc, &num| (acc * num) / hcf(acc, num))
+}
+
+fn part2(data: &str) -> u64 {
     let instructions = data.lines().next().unwrap().chars();
     let mut elements: HashMap<&str, (&str, &str)> = HashMap::new();
 
@@ -27,37 +64,21 @@ fn part2(data: &str) -> u32 {
         elements.insert(location, directions);
     }
 
-    let mut curr: Vec<&str> = elements
+    let nodes: Vec<&str> = elements
         .keys()
         .filter(|k| k.ends_with('A'))
         .cloned()
         .collect();
-    let end = 'Z';
-    let mut count = 0;
-    let mut instruct_it = instructions.cycle();
 
-    loop {
-        if curr.iter().all(|n| n.ends_with(end)) {
-            return count;
-        }
+    let all_counts: Vec<u64> = nodes
+        .iter()
+        .map(|node| {
+            let mut instruct_it = instructions.clone().cycle();
+            count_steps(node, &mut instruct_it, &elements)
+        })
+        .collect();
 
-        let next_val = instruct_it.next();
-
-        let new_nodes: Vec<&str> = curr
-            .iter()
-            .map(|node| {
-                let directions = elements.get(node).unwrap();
-                match next_val {
-                    Some('L') => directions.0,
-                    Some('R') => directions.1,
-                    _ => unimplemented!(),
-                }
-            })
-            .collect();
-
-        curr = new_nodes;
-        count += 1;
-    }
+    lcm(all_counts)
 }
 
 #[cfg(test)]
@@ -67,6 +88,17 @@ mod tests {
 
     fn load_file() -> String {
         fs::read_to_string(TEST_DATA_FILE).unwrap()
+    }
+
+    #[test]
+    fn lcm_works() {
+        assert_eq!(lcm(vec![6, 15]), 30);
+    }
+
+    #[test]
+    fn hcf_works() {
+        assert_eq!(hcf(6, 15), 3);
+        assert_eq!(hcf(318, 265), 53);
     }
 
     #[test]
