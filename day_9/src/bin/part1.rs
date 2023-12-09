@@ -26,7 +26,7 @@ fn solve(mut nums: Vec<i32>) -> i32 {
         prev_nums[i - 1].push(curr + prev);
     }
 
-    *prev_nums.iter().next().unwrap().last().unwrap()
+    *prev_nums.first().unwrap().last().unwrap()
 }
 
 // Alternate solution using recursion
@@ -50,7 +50,7 @@ fn solve_alternate(nums: Vec<i32>) -> i32 {
 
 fn part1(data: &str) -> i32 {
     data.lines()
-        .map(|line| line.split(" ").map(|n| n.parse().unwrap()).collect())
+        .map(|line| line.split(' ').map(|n| n.parse().unwrap()).collect())
         .map(solve)
         .sum()
 }
