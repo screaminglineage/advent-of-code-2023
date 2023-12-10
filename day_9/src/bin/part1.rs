@@ -30,22 +30,14 @@ fn solve(mut nums: Vec<i32>) -> i32 {
 }
 
 // Alternate solution using recursion
-fn solve_alternate(nums: Vec<i32>) -> i32 {
-    fn solve_recursive(nums: Vec<i32>) -> Vec<i32> {
-        if nums.iter().all(|&n| n == 0) {
-            let mut new = nums.clone();
-            new.push(0);
-            return new;
-        }
-
-        let diffs: Vec<i32> = nums.windows(2).map(|chunk| chunk[1] - chunk[0]).collect();
-        let mut new = solve_recursive(diffs.clone());
-
-        new.push(nums.last().unwrap() + *new.last().unwrap());
-        new
+#[allow(unused)]
+fn solve_recursive(nums: Vec<i32>) -> i32 {
+    if nums.iter().all(|&n| n == 0) {
+        return 0;
     }
 
-    *solve_recursive(nums).last().unwrap()
+    let diffs: Vec<i32> = nums.windows(2).map(|chunk| chunk[1] - chunk[0]).collect();
+    nums.last().unwrap() + solve_recursive(diffs)
 }
 
 fn part1(data: &str) -> i32 {
