@@ -11,10 +11,11 @@ fn main() {
     println!("Part 1: {output}");
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 struct Point {
     x: usize,
     y: usize,
+    dist: u32,
 }
 
 fn get_neighbours(grid: &[Vec<char>], point: &Point) -> Vec<Point> {
@@ -39,6 +40,7 @@ fn get_neighbours(grid: &[Vec<char>], point: &Point) -> Vec<Point> {
             neighbours.push(Point {
                 x: x as usize,
                 y: y as usize,
+                dist: 0,
             });
         }
     }
@@ -81,20 +83,35 @@ fn validate_points(grid: &[Vec<char>], curr: &Point, neighbours: Vec<Point>) -> 
 
 fn traverse_grid(grid: &[Vec<char>], start: &Point) -> Vec<Vec<u32>> {
     let dists: Vec<Vec<u32>> = Vec::new();
-    let mut points: VecDeque<&Point> = VecDeque::new();
+    let mut points: VecDeque<Point> = VecDeque::new();
 
-    let mut visited: HashSet<&Point> = HashSet::new();
+    let mut visited: HashSet<Point> = HashSet::new();
 
     let point = start;
     let neighbours = validate_points(grid, &point, get_neighbours(grid, &point));
     neighbours.iter().for_each(|point| {
-        visited.insert(point);
-    });
-    neighbours.iter().for_each(|p| {
-        dbg!(grid[p.y][p.x]);
+        visited.insert(*point);
     });
 
-    points.extend(neighbours.iter());
+    points.extend(neighbours.into_iter().map(|mut p| {
+        p.dist = 1;
+        p
+    }));
+
+    while !points.is_empty() {
+        let mut point = points.pop_front().unwrap();
+        if visited.contains(&point) {
+            continue;
+        }
+        point.dist += 1;
+
+        let neighbours = validate_points(grid, &point, get_neighbours(grid, &point));
+
+        neighbours.iter().for_each(|point| {
+            visited.insert(*point);
+        });
+        points.extend(neighbours.into_iter());
+    }
 
     dists
 }
@@ -103,7 +120,11 @@ fn find_start(grid: &[Vec<char>]) -> Point {
     for (i, row) in grid.iter().enumerate() {
         for (j, _) in row.iter().enumerate() {
             if grid[i][j] == 'S' {
-                return Point { x: i, y: j };
+                return Point {
+                    x: i,
+                    y: j,
+                    dist: 0,
+                };
             }
         }
     }
