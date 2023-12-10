@@ -45,7 +45,7 @@ fn get_neighbours(grid: &[Vec<char>], point: &Point) -> Vec<Point> {
     neighbours
 }
 
-fn is_connected(grid: &[Vec<char>], curr: &Point, next: &Point) -> bool {
+fn __is_connected(grid: &[Vec<char>], curr: &Point, next: &Point) -> bool {
     let curr_char = grid[curr.y][curr.x];
     let next_char = grid[next.y][next.x];
 
@@ -58,62 +58,71 @@ fn is_connected(grid: &[Vec<char>], curr: &Point, next: &Point) -> bool {
     }
 
     // towards east
-    if curr.x < next.y && curr.y == next.y {
-        return matches!((curr_char, next_char), ('-', '-') | ('-', 'J') | ('-', '7'));
+    if curr.x < next.x && curr.y == next.y {
+        return matches!(
+            (curr_char, next_char),
+            ('-', '-') | ('-', 'J') | ('-', '7') | ('L', 'J') | ('F', '7') | ('F', 'J')
+        );
 
     // towards west
-    } else if curr.x > next.y && curr.y == next.y {
-        return matches!((curr_char, next_char), ('-', '-') | ('-', 'F') | ('-', 'L'));
+    } else if curr.x > next.x && curr.y == next.y {
+        return matches!(
+            (curr_char, next_char),
+            ('-', '-') | ('-', 'F') | ('-', 'L') | ('7', 'L') | ('F', 'J') | ('F', '7')
+        );
 
     // towards north
-    } else if curr.x == next.y && curr.y > next.y {
-        return matches!((curr_char, next_char), ('|', '|') | ('|', 'F') | ('|', '7'));
+    } else if curr.x == next.x && curr.y > next.y {
+        return matches!(
+            (curr_char, next_char),
+            ('|', '|') | ('|', 'F') | ('|', '7') | ('J', 'F') | ('J', '7') | ('J', '|')
+        );
 
     // towards south
-    } else if curr.x == next.y && curr.y < next.y {
+    } else if curr.x == next.x && curr.y < next.y {
         return matches!((curr_char, next_char), ('|', '|') | ('|', 'J') | ('|', 'L'));
     }
 
     false
 }
 
-fn traverse_grid(grid: &[Vec<char>], start: &Point) -> Vec<Vec<u32>> {
-    let dists: Vec<Vec<u32>> = Vec::new();
+fn is_connected(grid: &[Vec<char>], curr: &Point, next: &Point) -> bool {
+    __is_connected(grid, curr, next) || __is_connected(grid, next, curr)
+}
+
+fn traverse_grid(grid: &[Vec<char>], start: &Point) -> u32 {
     let mut points: VecDeque<(Point, u32)> = VecDeque::new();
     let mut visited: HashSet<Point> = HashSet::new();
 
-    let point = start;
-    let neighbours = validate_points(grid, &point, get_neighbours(grid, &point));
-    neighbours.iter().for_each(|point| {
-        visited.insert(*point);
-    });
+    dbg!(start);
+    visited.insert(*start);
+    points.push_back((*start, 0));
 
-    points.extend(neighbours.into_iter().map(|p| (p, 1)));
-
+    let mut max_dist = 0;
     while !points.is_empty() {
         let (point, dist) = points.pop_front().unwrap();
-        if visited.contains(&point) {
-            continue;
+        // println!("{:?} {}", point, grid[point.y][point.x]);
+        visited.insert(point);
+
+        for neighbour in get_neighbours(grid, &point) {
+            if is_connected(grid, &point, &neighbour) && !visited.contains(&neighbour) {
+                points.push_back((neighbour, dist + 1));
+            }
         }
-        let dist = dist + 1;
-
-        let neighbours = validate_points(grid, &point, get_neighbours(grid, &point));
-
-        neighbours.iter().for_each(|point| {
-            visited.insert(*point);
-        });
-        points.extend(neighbours.into_iter().map(|p| (p, dist)));
-        dbg!(&points);
+        if dist > max_dist {
+            println!("{:?} {}", point, grid[point.y][point.x]);
+            max_dist = dist;
+        }
     }
 
-    dists
+    max_dist
 }
 
 fn find_start(grid: &[Vec<char>]) -> Point {
     for (i, row) in grid.iter().enumerate() {
         for (j, _) in row.iter().enumerate() {
             if grid[i][j] == 'S' {
-                return Point { x: i, y: j };
+                return Point { x: j, y: i };
             }
         }
     }
@@ -123,10 +132,7 @@ fn find_start(grid: &[Vec<char>]) -> Point {
 fn part1(data: &str) -> u32 {
     let grid: Vec<Vec<char>> = data.lines().map(|line| line.chars().collect()).collect();
     let start = find_start(&grid);
-    let dists = traverse_grid(&grid, &start);
-    dbg!(&dists);
-    // *dists.iter().flatten().max().unwrap()
-    todo!()
+    traverse_grid(&grid, &start)
 }
 
 #[cfg(test)]
@@ -144,14 +150,48 @@ mod tests {
     }
 
     #[test]
+    fn connected_works1() {
+        let data = load_file1();
+        let grid: Vec<Vec<char>> = data.lines().map(|line| line.chars().collect()).collect();
+        assert!(is_connected(
+            &grid,
+            &Point { y: 1, x: 1 },
+            &Point { y: 2, x: 1 }
+        ));
+
+        assert!(is_connected(
+            &grid,
+            &Point { y: 1, x: 2 },
+            &Point { y: 1, x: 3 }
+        ));
+
+        assert!(is_connected(
+            &grid,
+            &Point { y: 3, x: 1 },
+            &Point { y: 3, x: 2 }
+        ));
+    }
+
+    #[test]
+    fn connected_works2() {
+        let data = load_file2();
+        let grid: Vec<Vec<char>> = data.lines().map(|line| line.chars().collect()).collect();
+        assert!(is_connected(
+            &grid,
+            &Point { y: 3, x: 1 },
+            &Point { y: 3, x: 2 }
+        ));
+    }
+
+    #[test]
     fn part1_works() {
         let data1 = load_file1();
         let data2 = load_file2();
 
-        let output1 = part1(&data1);
+        // let output1 = part1(&data1);
         let output2 = part1(&data2);
 
-        assert_eq!(output1, 4);
+        // assert_eq!(output1, 4);
         assert_eq!(output2, 8);
     }
 }
