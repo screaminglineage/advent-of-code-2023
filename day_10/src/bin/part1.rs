@@ -15,7 +15,6 @@ fn main() {
 struct Point {
     x: usize,
     y: usize,
-    dist: u32,
 }
 
 fn get_neighbours(grid: &[Vec<char>], point: &Point) -> Vec<Point> {
@@ -40,51 +39,47 @@ fn get_neighbours(grid: &[Vec<char>], point: &Point) -> Vec<Point> {
             neighbours.push(Point {
                 x: x as usize,
                 y: y as usize,
-                dist: 0,
             });
         }
     }
     neighbours
 }
 
-fn validate_points(grid: &[Vec<char>], curr: &Point, neighbours: Vec<Point>) -> Vec<Point> {
-    let mut new_points = Vec::new();
-    for point in neighbours {
-        match grid[point.y][point.x] {
-            '|' if point.y != curr.y && point.x != curr.x => new_points.push(point),
-            '-' if point.y == curr.y && point.x != curr.x => new_points.push(point),
-            'L' if (point.y > curr.y && point.x == curr.x)
-                || (point.y == curr.y && point.x < curr.x) =>
-            {
-                new_points.push(point)
-            }
-            'J' if (point.y > curr.y && point.x == curr.x)
-                || (point.y == curr.y && point.x > curr.x) =>
-            {
-                new_points.push(point)
-            }
-            '7' if (point.y < curr.y && point.x == curr.x)
-                || (point.y == curr.y && point.x > curr.x) =>
-            {
-                new_points.push(point)
-            }
-            'F' if (point.y < curr.y && point.x == curr.x)
-                || (point.y == curr.y && point.x < curr.x) =>
-            {
-                new_points.push(point)
-            }
-            '.' => (),
-            'S' => (),
-            _ => (),
-        }
+fn is_connected(grid: &[Vec<char>], curr: &Point, next: &Point) -> bool {
+    let curr_char = grid[curr.y][curr.x];
+    let next_char = grid[next.y][next.x];
+
+    if curr_char == '.' || next_char == '.' {
+        return false;
     }
-    new_points
+
+    if curr_char == 'S' || next_char == 'S' {
+        return true;
+    }
+
+    // towards east
+    if curr.x < next.y && curr.y == next.y {
+        return matches!((curr_char, next_char), ('-', '-') | ('-', 'J') | ('-', '7'));
+
+    // towards west
+    } else if curr.x > next.y && curr.y == next.y {
+        return matches!((curr_char, next_char), ('-', '-') | ('-', 'F') | ('-', 'L'));
+
+    // towards north
+    } else if curr.x == next.y && curr.y > next.y {
+        return matches!((curr_char, next_char), ('|', '|') | ('|', 'F') | ('|', '7'));
+
+    // towards south
+    } else if curr.x == next.y && curr.y < next.y {
+        return matches!((curr_char, next_char), ('|', '|') | ('|', 'J') | ('|', 'L'));
+    }
+
+    false
 }
 
 fn traverse_grid(grid: &[Vec<char>], start: &Point) -> Vec<Vec<u32>> {
     let dists: Vec<Vec<u32>> = Vec::new();
-    let mut points: VecDeque<Point> = VecDeque::new();
-
+    let mut points: VecDeque<(Point, u32)> = VecDeque::new();
     let mut visited: HashSet<Point> = HashSet::new();
 
     let point = start;
@@ -93,24 +88,22 @@ fn traverse_grid(grid: &[Vec<char>], start: &Point) -> Vec<Vec<u32>> {
         visited.insert(*point);
     });
 
-    points.extend(neighbours.into_iter().map(|mut p| {
-        p.dist = 1;
-        p
-    }));
+    points.extend(neighbours.into_iter().map(|p| (p, 1)));
 
     while !points.is_empty() {
-        let mut point = points.pop_front().unwrap();
+        let (point, dist) = points.pop_front().unwrap();
         if visited.contains(&point) {
             continue;
         }
-        point.dist += 1;
+        let dist = dist + 1;
 
         let neighbours = validate_points(grid, &point, get_neighbours(grid, &point));
 
         neighbours.iter().for_each(|point| {
             visited.insert(*point);
         });
-        points.extend(neighbours.into_iter());
+        points.extend(neighbours.into_iter().map(|p| (p, dist)));
+        dbg!(&points);
     }
 
     dists
@@ -120,11 +113,7 @@ fn find_start(grid: &[Vec<char>]) -> Point {
     for (i, row) in grid.iter().enumerate() {
         for (j, _) in row.iter().enumerate() {
             if grid[i][j] == 'S' {
-                return Point {
-                    x: i,
-                    y: j,
-                    dist: 0,
-                };
+                return Point { x: i, y: j };
             }
         }
     }
