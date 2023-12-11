@@ -9,21 +9,15 @@ fn main() {
 }
 
 fn count_empty_rows(space: &[Vec<char>], point1: &Point, point2: &Point) -> u32 {
-    let start_pt = point1.min(point2);
-    let end_pt = point1.max(point2);
+    let start_pt = point1.y.min(point2.y);
+    let end_pt = point1.y.max(point2.y);
     let mut empty = 0;
-    let mut count = start_pt.y;
-    loop {
-        if count >= end_pt.y {
-            break;
-        }
 
-        let row = &space[count as usize];
+    for y in start_pt..end_pt {
+        let row = &space[y as usize];
         if row.iter().all(|&ch| ch == '.') {
             empty += 1;
-            count += 1;
         }
-        count += 1;
     }
     empty
 }
@@ -80,8 +74,8 @@ fn solve(space: &[Vec<char>], expansion: u32) -> u64 {
                         if col2 == '#' && point_1 != point_2 && !counted.contains(&point_2) {
                             let dist =
                                 point_2.x.abs_diff(point_1.x) + point_2.y.abs_diff(point_1.y);
-                            let empty = empty_cols + empty_rows;
-                            let final_dist = (dist - empty) + (empty * expansion);
+                            let empty_total = empty_cols + empty_rows;
+                            let final_dist = (dist - empty_total) + (empty_total * expansion);
                             sum += final_dist as u64;
                         }
                     }
@@ -95,25 +89,6 @@ fn solve(space: &[Vec<char>], expansion: u32) -> u64 {
 
 fn part2(data: &str) -> u64 {
     let space: Vec<Vec<char>> = data.lines().map(|line| line.chars().collect()).collect();
-
-    dbg!(count_empty_rows(
-        &space,
-        &Point { y: 0, x: 0 },
-        &Point {
-            x: space[0].len() as i32,
-            y: space.len() as i32
-        }
-    ));
-
-    dbg!(count_empty_cols(
-        &space,
-        &Point { y: 0, x: 0 },
-        &Point {
-            x: space[0].len() as i32,
-            y: space.len() as i32
-        }
-    ));
-
     solve(&space, 1000000)
 }
 
