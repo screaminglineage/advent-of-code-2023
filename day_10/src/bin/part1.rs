@@ -5,6 +5,7 @@ use std::{
 
 const DATA_FILE: &str = "data.txt";
 
+// INCOMPLETE
 fn main() {
     let input = fs::read_to_string(DATA_FILE).unwrap();
     let output = part1(&input);
@@ -45,6 +46,7 @@ fn get_neighbours(grid: &[Vec<char>], point: &Point) -> Vec<Point> {
     neighbours
 }
 
+// this function sucks and its broken
 fn __is_connected(grid: &[Vec<char>], curr: &Point, next: &Point) -> bool {
     let curr_char = grid[curr.y][curr.x];
     let next_char = grid[next.y][next.x];
