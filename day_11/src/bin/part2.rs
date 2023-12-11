@@ -8,22 +8,18 @@ fn main() {
     println!("Part 2: {output}");
 }
 
-fn expand_rows(space: &mut Vec<Vec<char>>) -> u32 {
+fn count_empty_rows(space: &[Vec<char>], point1: &Point, point2: &Point) -> u32 {
+    let start_pt = point1.min(point2);
+    let end_pt = point1.max(point2);
     let mut expansions = 0;
-    let mut count = 0;
+    let mut count = start_pt.y;
     loop {
-        if count >= space.len() - 1 {
+        if count >= end_pt.y {
             break;
         }
 
-        let row = &space[count];
+        let row = &space[count as usize];
         if row.iter().all(|&ch| ch == '.') {
-            let new_row = vec!['.'; row.len()];
-            if count < row.len() {
-                space.insert(count + 1, new_row);
-            } else {
-                space.push(new_row);
-            }
             expansions += 1;
             count += 1;
         }
@@ -32,49 +28,60 @@ fn expand_rows(space: &mut Vec<Vec<char>>) -> u32 {
     expansions
 }
 
-fn expand_columns(space: &mut Vec<Vec<char>>) -> u32 {
-    let mut col = 0;
-    let max_row = space.len();
-    let mut expansions = 0;
-    loop {
-        if col >= space[0].len() - 1 {
-            break;
-        }
+// fn count_empty_rows(space: &[Vec<char>], point1: &Point, point2: &Point) -> u32 {
+//     let start_pt = point1.x.min(point2.x);
+//     let end_pt = point1.x.max(point2.x);
+//
+//     for
+//
+//     0
+// }
 
-        let mut will_expand = true;
-        for i in 0..max_row {
-            if space[i][col] == '#' {
-                will_expand = false;
-                break;
-            }
-        }
-        if will_expand {
-            for i in 0..max_row {
-                if i < max_row {
-                    space[i].insert(col + 1, '.');
-                } else {
-                    space[i].push('.');
-                }
-            }
-            expansions += 1;
-            col += 1;
-        }
-        col += 1;
-    }
-    expansions
+fn rotate_90<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
+    assert!(!v.is_empty());
+    let len = v[0].len();
+    let mut iters: Vec<_> = v.into_iter().map(|n| n.into_iter()).collect();
+    (0..len)
+        .map(|_| {
+            iters
+                .iter_mut()
+                .map(|n| n.next().unwrap())
+                .rev()
+                .collect::<Vec<T>>()
+        })
+        .rev()
+        .collect()
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
+#[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 struct Point {
     y: i32,
     x: i32,
 }
 
 fn part2(data: &str) -> u64 {
-    let mut space: Vec<Vec<char>> = data.lines().map(|line| line.chars().collect()).collect();
-    // let a = expand_rows(&mut space);
-    // let b = expand_columns(&mut space);
-    // dbg!(a, b);
+    let space: Vec<Vec<char>> = data.lines().map(|line| line.chars().collect()).collect();
+
+    // dbg!(count_empty_rows(
+    //     &space,
+    //     &Point { y: 0, x: 0 },
+    //     &Point {
+    //         x: space[0].len() as i32,
+    //         y: space.len() as i32
+    //     }
+    // ));
+    //
+    let space = rotate_90(space);
+    // dbg!(count_empty_rows(
+    //     &space,
+    //     &Point { y: 0, x: 0 },
+    //     &Point {
+    //         x: space[0].len() as i32,
+    //         y: space.len() as i32
+    //     }
+    // ));
+
+    let inc = 1000000;
 
     let mut counted = HashSet::new();
     let mut sum = 0;
@@ -91,10 +98,16 @@ fn part2(data: &str) -> u64 {
                             x: x2 as i32,
                             y: y2 as i32,
                         };
+                        let empty_rows = count_empty_rows(&space, &point_1, &point_2);
+                        let rotated = rotate_90(space.clone());
+                        let empty_cols = count_empty_rows(&rotated, &point_1, &point_2);
+
                         if col2 == '#' && point_1 != point_2 && !counted.contains(&point_2) {
-                            let dist = (point_2.x.abs_diff(point_1.x) * 2)
-                                .abs_diff(point_2.y.abs_diff(point_1.y) * 3);
-                            sum += dist as u64;
+                            let dist =
+                                point_2.x.abs_diff(point_1.x) + point_2.y.abs_diff(point_1.y);
+                            let empty = empty_cols + empty_rows;
+                            let final_dist = (dist - empty) + (empty * inc);
+                            sum += final_dist as u64;
                         }
                     }
                 }
