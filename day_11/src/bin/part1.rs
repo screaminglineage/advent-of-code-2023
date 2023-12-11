@@ -1,4 +1,4 @@
-use std::fs;
+use std::{collections::HashSet, fs};
 
 const DATA_FILE: &str = "data.txt";
 
@@ -58,15 +58,44 @@ fn expand_columns(space: &mut Vec<Vec<char>>) {
     }
 }
 
+#[derive(Debug, PartialEq, Eq, Hash)]
+struct Point {
+    y: i32,
+    x: i32,
+}
+
 fn part1(data: &str) -> u32 {
     let mut space: Vec<Vec<char>> = data.lines().map(|line| line.chars().collect()).collect();
     expand_rows(&mut space);
     expand_columns(&mut space);
 
-    for (i, row) in space.iter().enumerate() {
-        println!("{i} - {row:?}");
+    let mut counted = HashSet::new();
+    let mut sum = 0;
+    for (y1, row) in space.iter().enumerate() {
+        for (x1, &col) in row.iter().enumerate() {
+            if col == '#' {
+                let point_1 = Point {
+                    x: x1 as i32,
+                    y: y1 as i32,
+                };
+                for (y2, row2) in space.iter().enumerate() {
+                    for (x2, &col2) in row2.iter().enumerate() {
+                        let point_2 = Point {
+                            x: x2 as i32,
+                            y: y2 as i32,
+                        };
+                        if col2 == '#' && point_1 != point_2 && !counted.contains(&point_2) {
+                            let dist =
+                                point_2.x.abs_diff(point_1.x) + point_2.y.abs_diff(point_1.y);
+                            sum += dist as u32;
+                        }
+                    }
+                }
+                counted.insert(point_1);
+            }
+        }
     }
-    0
+    sum
 }
 
 #[cfg(test)]
