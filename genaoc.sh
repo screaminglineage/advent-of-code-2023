@@ -6,7 +6,7 @@ IS_NUM="^[0-9]+$"
 
 # Shows information about this command
 help() {
-    echo "usage: genaoc [day_count] [year]"
+    echo "usage: genaoc [day_count]"
     echo ""
     echo "Generates a Rust Template for Advent of Code"
     echo ""
@@ -20,11 +20,7 @@ help() {
 
 gen_aoc() {
     day="day_${1}"
-    [[ $2 ]] && year="$2" || year="$(date | cut -d' ' -f 4)"
-
     
-    [[ -d $year ]] || mkdir "$year" || exit
-    cd "$year" || exit
     cargo new --vcs none "${day}" || exit
     
     # Deletes pre-created main.rs
