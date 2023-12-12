@@ -47,7 +47,7 @@ fn get_neighbours(grid: &[Vec<char>], point: &Point) -> Vec<Point> {
 }
 
 // this function sucks and its broken
-fn __is_connected(grid: &[Vec<char>], curr: &Point, next: &Point) -> bool {
+fn is_connected(grid: &[Vec<char>], curr: &Point, next: &Point) -> bool {
     let curr_char = grid[curr.y][curr.x];
     let next_char = grid[next.y][next.x];
 
@@ -63,33 +63,63 @@ fn __is_connected(grid: &[Vec<char>], curr: &Point, next: &Point) -> bool {
     if curr.x < next.x && curr.y == next.y {
         return matches!(
             (curr_char, next_char),
-            ('-', '-') | ('-', 'J') | ('-', '7') | ('L', 'J') | ('F', '7') | ('F', 'J')
+            ('-', '-')
+                | ('-', 'J')
+                | ('-', '7')
+                | ('F', 'J')
+                | ('F', '7')
+                | ('F', '-')
+                | ('L', 'J')
+                | ('L', '7')
+                | ('L', '-')
         );
 
     // towards west
     } else if curr.x > next.x && curr.y == next.y {
         return matches!(
             (curr_char, next_char),
-            ('-', '-') | ('-', 'F') | ('-', 'L') | ('7', 'L') | ('F', 'J') | ('F', '7')
+            ('-', '-')
+                | ('-', 'F')
+                | ('-', 'L')
+                | ('J', 'L')
+                | ('J', 'F')
+                | ('J', '-')
+                | ('7', 'L')
+                | ('7', 'F')
+                | ('7', '-')
         );
 
     // towards north
     } else if curr.x == next.x && curr.y > next.y {
         return matches!(
             (curr_char, next_char),
-            ('|', '|') | ('|', 'F') | ('|', '7') | ('J', 'F') | ('J', '7') | ('J', '|')
+            ('|', '|')
+                | ('|', 'F')
+                | ('|', '7')
+                | ('L', '|')
+                | ('L', '7')
+                | ('L', 'F')
+                | ('J', 'F')
+                | ('J', '7')
+                | ('J', '|')
         );
 
     // towards south
     } else if curr.x == next.x && curr.y < next.y {
-        return matches!((curr_char, next_char), ('|', '|') | ('|', 'J') | ('|', 'L'));
+        return matches!(
+            (curr_char, next_char),
+            ('|', '|')
+                | ('|', 'J')
+                | ('|', 'L')
+                | ('7', 'L')
+                | ('7', 'J')
+                | ('7', '|')
+                | ('F', 'L')
+                | ('F', 'J')
+        );
     }
 
     false
-}
-
-fn is_connected(grid: &[Vec<char>], curr: &Point, next: &Point) -> bool {
-    __is_connected(grid, curr, next) || __is_connected(grid, next, curr)
 }
 
 fn traverse_grid(grid: &[Vec<char>], start: &Point) -> u32 {
