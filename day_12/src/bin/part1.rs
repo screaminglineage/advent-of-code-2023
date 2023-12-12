@@ -26,24 +26,6 @@ fn check_arrangement(springs: &[char], nums: &[i32]) -> bool {
     true
 }
 
-const SPRINGS: [char; 2] = ['#', '.'];
-
-fn count_springs(springs: Vec<char>, nums: &[i32]) -> i32 {
-    let mut count = 0;
-    for (i, &ch) in springs.iter().enumerate() {
-        if ch == '?' {
-            for spring_type in SPRINGS {
-                let mut new = springs.clone();
-                new[i] = spring_type;
-                if check_arrangement(&new, nums) {
-                    count += 1;
-                }
-            }
-        }
-    }
-    count
-}
-
 fn part1(data: &str) -> i32 {
     for line in data.lines() {
         let mut line = line.split_whitespace();
