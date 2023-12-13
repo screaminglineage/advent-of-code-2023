@@ -18,8 +18,24 @@ fn count_mirror_rows(pattern: &[Vec<char>]) -> Option<u32> {
 
     for index in indices {
         let (p1, p2) = pattern.split_at(index + 1);
-        if p1.iter().rev().zip(p2.iter()).all(|(x, y)| x == y) {
-            return Some(index as u32 + 1);
+        let c = p1
+            .iter()
+            .rev()
+            .zip(p2.iter())
+            .flat_map(|(x, y)| x.iter().zip(y.iter()).filter(|(a, b)| a != b))
+            .count();
+
+        if c == 1 {
+            let pos = p1
+                .iter()
+                .rev()
+                .zip(p2.iter())
+                .flat_map(|(x, y)| x.iter().zip(y.iter()).position(|(a, b)| a != b))
+                .next()
+                .unwrap();
+            dbg!(p1.iter().map(|line| line.iter().nth(pos)).next().unwrap());
+        } else {
+            println!("nope");
         }
     }
     None
@@ -44,18 +60,22 @@ fn rotate_90<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
 fn part2(data: &str) -> u32 {
     let patterns: Vec<&str> = data.split("\n\n").collect();
     let mut sum = 0;
-    for p in &patterns {
-        let a: Vec<Vec<char>> = p.lines().map(|line| line.chars().collect()).collect();
+    // for p in &patterns {
+    println!("Pattern ");
+    let a: Vec<Vec<char>> = patterns[1]
+        .lines()
+        .map(|line| line.chars().collect())
+        .collect();
 
-        let row = count_mirror_rows(&a);
-        let a = rotate_90(a);
-        let col = count_mirror_rows(&a);
-        sum += match (row, col) {
-            (Some(x), None) => x * 100,
-            (None, Some(x)) => x,
-            _ => unreachable!("Input doesnt seem to have both horizontal and vertical mirroring"),
-        }
-    }
+    let row = count_mirror_rows(&a);
+    let a = rotate_90(a);
+    let col = count_mirror_rows(&a);
+    sum += match (row, col) {
+        (Some(x), None) => x * 100,
+        (None, Some(x)) => x,
+        _ => 0, // deal with this later
+    };
+    // }
     sum
 }
 
