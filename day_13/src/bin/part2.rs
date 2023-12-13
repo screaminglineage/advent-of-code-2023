@@ -20,7 +20,7 @@ fn get_off_by_one(pattern: &[Vec<char>]) -> Vec<(usize, usize)> {
                 index = j;
             }
         }
-        if count == 1 {
+        if count <= 1 {
             indices.push((i, index));
         }
     }
@@ -37,31 +37,12 @@ fn get_similar(pattern: &[Vec<char>]) -> Vec<usize> {
 }
 
 fn count_mirror_rows(pattern: &mut [Vec<char>]) -> Option<u32> {
-    let indices = get_similar(pattern);
-    let indices2 = get_off_by_one(pattern);
-
-    // for x in pattern.iter() {
-    //     println!("{x:?}")
-    // }
-
-    // dbg!(indices2);
-
-    for (index, _) in indices2 {
-        let (p1, p2) = pattern.split_at(index + 1);
-
-        let mut count = 0;
-        for (a, b) in p1.iter().rev().zip(p2.iter()) {
-            let is_off_by_one = a.iter().zip(b.iter()).filter(|(x, y)| x != y).count() == 1;
-            if is_off_by_one {
-                count += 1;
-            }
-        }
-        if count <= 1 {
-            return Some(index as u32 + 1);
-        }
+    let indices = get_off_by_one(pattern);
+    for x in pattern.iter() {
+        println!("{x:?}")
     }
 
-    for index in indices {
+    for (index, _) in indices {
         let (p1, p2) = pattern.split_at(index + 1);
 
         let mut count = 0;
