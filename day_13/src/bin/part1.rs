@@ -8,7 +8,7 @@ fn main() {
     println!("Part 1: {output}");
 }
 
-fn detect_mirror(pattern: &[Vec<char>]) -> Option<u32> {
+fn count_mirror_rows(pattern: &[Vec<char>]) -> Option<u32> {
     let indices: Vec<_> = pattern
         .windows(2)
         .enumerate()
@@ -17,73 +17,12 @@ fn detect_mirror(pattern: &[Vec<char>]) -> Option<u32> {
         .collect();
 
     for index in indices {
-        let (p1, p2) = pattern.split_at(index);
-        if p1.iter().zip(p2.iter()).all(|(x, y)| x == y) {
-            return Some(index as u32);
+        let (p1, p2) = pattern.split_at(index + 1);
+        if p1.iter().rev().zip(p2.iter()).all(|(x, y)| x == y) {
+            return Some(index as u32 + 1);
         }
     }
     None
-}
-
-fn count_rows_above(pattern: &str) -> u32 {
-    let pattern: Vec<&str> = pattern.lines().collect();
-    let mut front = 0;
-    let mut back = pattern.len() - 1;
-    let median = back / 2;
-    let mut count = 0;
-
-    let mut i = 0;
-    while front <= median && back > median {
-        if pattern[front] == pattern[back] {
-            count += 1;
-            front += 1;
-            back -= 1;
-        } else if i == 0 && pattern[front] == pattern[back - 1] {
-            back -= 1;
-        } else if i == 0 && pattern[front + 1] == pattern[back] {
-            front += 1;
-        } else {
-            count = 0;
-            break;
-        }
-        i += 1;
-    }
-
-    if count == 0 {
-        count
-    } else {
-        count + 1
-    }
-}
-
-fn count_rows_above_2(pattern: &[Vec<char>]) -> u32 {
-    let mut front = 0;
-    let mut back = pattern.len() - 1;
-    let median = back / 2;
-    let mut count = 0;
-
-    let mut i = 0;
-    while front <= median && back > median {
-        if pattern[front] == pattern[back] {
-            count += 1;
-            front += 1;
-            back -= 1;
-        } else if i == 0 && pattern[front] == pattern[back - 1] {
-            back -= 1;
-        } else if i == 0 && pattern[front + 1] == pattern[back] {
-            front += 1;
-        } else {
-            count = 0;
-            break;
-        }
-        i += 1;
-    }
-
-    if count == 0 {
-        count
-    } else {
-        count + 1
-    }
 }
 
 fn rotate_90<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
@@ -104,20 +43,20 @@ fn rotate_90<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
 
 fn part1(data: &str) -> u32 {
     let patterns: Vec<&str> = data.split("\n\n").collect();
+    let mut sum = 0;
     for p in &patterns {
         let a: Vec<Vec<char>> = p.lines().map(|line| line.chars().collect()).collect();
 
-        let n = detect_mirror(&a);
+        let row = count_mirror_rows(&a);
         let a = rotate_90(a);
-        let r = detect_mirror(&a);
-        // for i in &a {
-        //     println!("{i:?}")
-        // }
-
-        println!("not rotated: {:?}, rotated: {:?}", n, r);
+        let col = count_mirror_rows(&a);
+        sum += match (row, col) {
+            (Some(x), None) => x * 100,
+            (None, Some(x)) => x,
+            _ => unreachable!("Input doesnt seem to have both horizontal and vertical mirroring"),
+        }
     }
-
-    0
+    sum
 }
 
 #[cfg(test)]
