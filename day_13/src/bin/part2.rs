@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, usize};
 
 const DATA_FILE: &str = "data.txt";
 
@@ -8,34 +8,75 @@ fn main() {
     println!("Part 2: {output}");
 }
 
-fn count_mirror_rows(pattern: &[Vec<char>]) -> Option<u32> {
-    let indices: Vec<_> = pattern
+fn get_off_by_one(pattern: &[Vec<char>]) -> Vec<(usize, usize)> {
+    let mut indices = Vec::new();
+    for (i, lines) in pattern.windows(2).enumerate() {
+        let [x, y] = lines else { unreachable!() };
+        let mut count = 0;
+        let mut index = 0;
+        for (j, (a, b)) in x.iter().zip(y.iter()).enumerate() {
+            if a != b {
+                count += 1;
+                index = j;
+            }
+        }
+        if count == 1 {
+            indices.push((i, index));
+        }
+    }
+    indices
+}
+
+fn get_similar(pattern: &[Vec<char>]) -> Vec<usize> {
+    pattern
         .windows(2)
         .enumerate()
         .filter(|(_, pair)| pair[0].iter().eq(pair[1].iter()))
         .map(|(i, _)| i)
-        .collect();
+        .collect()
+}
+
+fn modify_off_by_one(pattern: &mut [Vec<char>], indices: Vec<(usize, usize)>) -> Vec<usize> {
+    let mut new_indices = Vec::new();
+    indices.iter().for_each(|(i, j)| {
+        let line = pattern.get_mut(*i).unwrap();
+        if line[*j] == '#' {
+            line[*j] = '.';
+        } else if line[*j] == '.' {
+            line[*j] = '#';
+        }
+        new_indices.push(*i);
+    });
+    new_indices
+}
+
+fn count_mirror_rows(pattern: &mut [Vec<char>]) -> Option<u32> {
+    let indices = get_similar(pattern);
+    let indices2 = modify_off_by_one(pattern, get_off_by_one(pattern));
+
+    // for x in pattern.iter() {
+    //     println!("{x:?}")
+    // }
+
+    for index in indices2 {
+        let (p1, p2) = pattern.split_at(index + 1);
+        if p1.iter().rev().zip(p2.iter()).all(|(x, y)| x == y) {
+            return Some(index as u32 + 1);
+        }
+    }
 
     for index in indices {
         let (p1, p2) = pattern.split_at(index + 1);
-        let c = p1
-            .iter()
-            .rev()
-            .zip(p2.iter())
-            .flat_map(|(x, y)| x.iter().zip(y.iter()).filter(|(a, b)| a != b))
-            .count();
 
-        if c == 1 {
-            let pos = p1
-                .iter()
-                .rev()
-                .zip(p2.iter())
-                .flat_map(|(x, y)| x.iter().zip(y.iter()).position(|(a, b)| a != b))
-                .next()
-                .unwrap();
-            dbg!(p1.iter().map(|line| line.iter().nth(pos)).next().unwrap());
-        } else {
-            println!("nope");
+        let mut count = 0;
+        for (a, b) in p1.iter().rev().zip(p2.iter()) {
+            let is_off_by_one = a.iter().zip(b.iter()).filter(|(x, y)| x != y).count() == 1;
+            if is_off_by_one {
+                count += 1;
+            }
+        }
+        if count <= 1 {
+            return Some(index as u32 + 1);
         }
     }
     None
@@ -60,22 +101,29 @@ fn rotate_90<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
 fn part2(data: &str) -> u32 {
     let patterns: Vec<&str> = data.split("\n\n").collect();
     let mut sum = 0;
-    // for p in &patterns {
-    println!("Pattern ");
-    let a: Vec<Vec<char>> = patterns[1]
-        .lines()
-        .map(|line| line.chars().collect())
-        .collect();
 
-    let row = count_mirror_rows(&a);
-    let a = rotate_90(a);
-    let col = count_mirror_rows(&a);
-    sum += match (row, col) {
-        (Some(x), None) => x * 100,
-        (None, Some(x)) => x,
-        _ => 0, // deal with this later
-    };
-    // }
+    for (i, p) in patterns.iter().enumerate() {
+        println!("Pattern {}", i + 1);
+        let mut a: Vec<Vec<char>> = p.lines().map(|line| line.chars().collect()).collect();
+
+        let row = count_mirror_rows(&mut a);
+
+        let mut a = rotate_90(a);
+        let col = count_mirror_rows(&mut a);
+
+        dbg!(row, col);
+
+        sum += match (row, col) {
+            (Some(x), None) => x * 100,
+            (None, Some(x)) => x,
+            _ => 0, // deal with this later
+        }
+    }
+    // let mut a: Vec<Vec<char>> = patterns[1]
+    //     .lines()
+    //     .map(|line| line.chars().collect())
+    //     .collect();
+    // dbg!(count_mirror_rows(&mut a));
     sum
 }
 
