@@ -1,4 +1,4 @@
-use std::{fs, usize};
+use std::fs;
 
 const DATA_FILE: &str = "data.txt";
 
@@ -36,31 +36,27 @@ fn get_similar(pattern: &[Vec<char>]) -> Vec<usize> {
         .collect()
 }
 
-fn modify_off_by_one(pattern: &mut [Vec<char>], indices: Vec<(usize, usize)>) -> Vec<usize> {
-    let mut new_indices = Vec::new();
-    indices.iter().for_each(|(i, j)| {
-        let line = pattern.get_mut(*i).unwrap();
-        if line[*j] == '#' {
-            line[*j] = '.';
-        } else if line[*j] == '.' {
-            line[*j] = '#';
-        }
-        new_indices.push(*i);
-    });
-    new_indices
-}
-
 fn count_mirror_rows(pattern: &mut [Vec<char>]) -> Option<u32> {
     let indices = get_similar(pattern);
-    let indices2 = modify_off_by_one(pattern, get_off_by_one(pattern));
+    let indices2 = get_off_by_one(pattern);
 
     // for x in pattern.iter() {
     //     println!("{x:?}")
     // }
 
-    for index in indices2 {
+    // dbg!(indices2);
+
+    for (index, _) in indices2 {
         let (p1, p2) = pattern.split_at(index + 1);
-        if p1.iter().rev().zip(p2.iter()).all(|(x, y)| x == y) {
+
+        let mut count = 0;
+        for (a, b) in p1.iter().rev().zip(p2.iter()) {
+            let is_off_by_one = a.iter().zip(b.iter()).filter(|(x, y)| x != y).count() == 1;
+            if is_off_by_one {
+                count += 1;
+            }
+        }
+        if count <= 1 {
             return Some(index as u32 + 1);
         }
     }
@@ -98,6 +94,7 @@ fn rotate_90<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
         .collect()
 }
 
+// Passes test cases but not actual input
 fn part2(data: &str) -> u32 {
     let patterns: Vec<&str> = data.split("\n\n").collect();
     let mut sum = 0;
@@ -114,9 +111,9 @@ fn part2(data: &str) -> u32 {
         dbg!(row, col);
 
         sum += match (row, col) {
-            (Some(x), None) => x * 100,
+            (Some(x), _) => x * 100,
             (None, Some(x)) => x,
-            _ => 0, // deal with this later
+            (None, None) => unreachable!(),
         }
     }
     // let mut a: Vec<Vec<char>> = patterns[1]
