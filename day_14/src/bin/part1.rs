@@ -8,21 +8,42 @@ fn main() {
     println!("Part 1: {output}");
 }
 
-fn roll_rocks(mut platform: Vec<Vec<char>>) -> Vec<Vec<char>> {
-    for (y, row) in platform.iter().enumerate() {
-        for (x, &unit) in row.iter().enumerate() {
-            if unit != '.' {
+fn roll_rocks(platform: &mut Vec<Vec<char>>) {
+    let max_row = platform.len();
+    let max_col = platform[0].len();
+    for y in 0..max_row {
+        for x in 0..max_col {
+            let current = platform[y][x];
+            if current != '.' {
                 continue;
+            }
+            let mut height = y;
+            while height < max_row - 1 {
+                if platform[height][x] == 'O' || platform[height][x] == '#' {
+                    break;
+                }
+                height += 1;
+            }
+            if platform[height][x] == '#' {
+                continue;
+            } else if platform[height][x] == 'O' {
+                platform[y][x] = platform[height][x];
+                platform[height][x] = current;
             }
         }
     }
-    todo!()
 }
 
 fn part1(data: &str) -> u32 {
-    let platform: Vec<Vec<char>> = data.lines().map(|line| line.chars().collect()).collect();
-    let platform = roll_rocks(platform);
-    0
+    let mut platform: Vec<Vec<char>> = data.lines().map(|line| line.chars().collect()).collect();
+    roll_rocks(&mut platform);
+
+    let max = platform.len();
+    platform
+        .iter()
+        .zip((1..max + 1).rev())
+        .map(|(row, i)| row.iter().filter(|&&ch| ch == 'O').count() * i)
+        .sum::<usize>() as u32
 }
 
 #[cfg(test)]
@@ -46,7 +67,9 @@ mod tests {
     #[test]
     fn roll_rocks_works() {
         let data = load_file();
-        let rolled_rocks = roll_rocks(&data);
+        let mut platform: Vec<Vec<char>> =
+            data.lines().map(|line| line.chars().collect()).collect();
+        roll_rocks(&mut platform);
         let answer = [
             vec!['O', 'O', 'O', 'O', '.', '#', '.', 'O', '.', '.'],
             vec!['O', 'O', '.', '.', '#', '.', '.', '.', '.', '#'],
@@ -59,7 +82,7 @@ mod tests {
             vec!['#', '.', '.', '.', '.', '#', '#', '#', '.', '.'],
             vec!['#', '.', '.', '.', '.', '#', '.', '.', '.', '.'],
         ];
-        assert!(vecs_match(&answer, &rolled_rocks));
+        assert!(vecs_match(&answer, &platform));
     }
 
     #[test]
