@@ -34,26 +34,48 @@ fn roll_rocks(platform: &mut Vec<Vec<char>>) {
     }
 }
 
-fn rotate_90_left<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
+fn rotate_90_right<T>(v: Vec<Vec<T>>) -> Vec<Vec<T>> {
     assert!(!v.is_empty());
     let len = v[0].len();
-    let mut iters: Vec<_> = v.into_iter().rev().map(|n| n.into_iter().rev()).collect();
+    let mut iters: Vec<_> = v.into_iter().map(|n| n.into_iter()).collect();
     (0..len)
         .map(|_| {
             iters
                 .iter_mut()
-                .rev()
                 .map(|n| n.next().unwrap())
+                .rev()
                 .collect::<Vec<T>>()
         })
         .collect()
 }
 
+// Should work but way too slow due to brute force approach
 fn part2(data: &str) -> u32 {
     let mut platform: Vec<Vec<char>> = data.lines().map(|line| line.chars().collect()).collect();
-    roll_rocks(&mut platform);
 
-    for _ in 0..4 {}
+    let cycles = 1000000000;
+    // let cycles = 1000;
+    for i in 0..cycles {
+        // println!("Cycle {}", i + 1);
+        for _ in 0..4 {
+            roll_rocks(&mut platform);
+
+            // println!("After Rolling");
+            // for a in &platform {
+            //     println!("{a:?}");
+            // }
+
+            platform = rotate_90_right(platform);
+            // println!("After Rotating");
+            // for a in &platform {
+            //     println!("{a:?}");
+            // }
+        }
+    }
+    for a in &platform {
+        println!("{a:?}");
+    }
+
     let max = platform.len();
     platform
         .iter()
@@ -81,13 +103,13 @@ mod tests {
     }
 
     #[test]
-    fn rotate_90_left_works() {
+    fn rotate_90_right_works() {
         let vec1 = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
-        let vec2 = rotate_90_left(vec1);
+        let vec2 = rotate_90_right(vec1);
         dbg!(&vec2);
         assert!(vecs_match(
             &vec2,
-            &[vec![3, 6, 9], vec![2, 5, 8], vec![1, 4, 7],]
+            &[vec![7, 4, 1], vec![8, 5, 2], vec![9, 6, 3],]
         ));
     }
 
