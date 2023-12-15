@@ -39,19 +39,19 @@ fn part2(data: &str) -> u32 {
 
         let hash = calculate_hash(lens.label) as usize;
 
-        if lens_data.contains(&"-") {
+        if lens_data.contains('-') {
             if let Some(i) = hashmap[hash]
                 .iter()
                 .position(|inner_lens| inner_lens.label == lens.label)
             {
                 hashmap[hash].remove(i);
             }
-        } else if lens_data.contains(&"=") {
+        } else if lens_data.contains('=') {
             match hashmap[hash]
                 .iter()
                 .position(|inner_lens| inner_lens.label == lens.label)
             {
-                // unwrapping is safe as we know i already exists
+                // unwrapping is safe as we know index `i` already exists
                 Some(i) => *hashmap[hash].get_mut(i).unwrap() = lens,
                 None => hashmap[hash].push(lens),
             }
