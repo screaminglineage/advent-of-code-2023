@@ -24,15 +24,14 @@ fn calculate_hash(seq: &str) -> u32 {
     curr
 }
 
-const VAL: Vec<Lens> = vec![];
+const VEC_LENS: Vec<Lens> = vec![];
 
 fn part2(data: &str) -> u32 {
     let data: Vec<&str> = data.trim().split(',').collect();
-    let mut hashmap: [Vec<Lens>; 256] = [VAL; 256];
+    let mut hashmap: [Vec<Lens>; 256] = [VEC_LENS; 256];
 
     for lens_data in data {
         let lens_data_parsed = lens_data.split(['-', '=']).collect::<Vec<&str>>();
-        dbg!(&lens_data_parsed);
         let lens = Lens {
             label: lens_data_parsed[0],
             focal_len: lens_data_parsed[1].parse().unwrap_or_default(),
@@ -61,9 +60,17 @@ fn part2(data: &str) -> u32 {
         }
     }
 
-    dbg!(&hashmap[0]);
-
-    0
+    hashmap
+        .iter()
+        .enumerate()
+        .filter(|(_, key)| !key.is_empty())
+        .map(|(i, key)| {
+            key.iter()
+                .enumerate()
+                .map(|(j, lens)| (i + 1) * (j + 1) * lens.focal_len as usize)
+                .sum::<usize>() as u32
+        })
+        .sum::<u32>()
 }
 
 #[cfg(test)]
@@ -80,6 +87,6 @@ mod tests {
         let data = load_file();
         let output = part2(&data);
 
-        assert_eq!(output, 1320);
+        assert_eq!(output, 145);
     }
 }
