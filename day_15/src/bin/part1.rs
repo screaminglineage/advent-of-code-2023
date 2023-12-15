@@ -8,8 +8,19 @@ fn main() {
     println!("Part 1: {output}");
 }
 
-fn part1(data: &str) -> String {
-    String::new()
+fn calculate_hash(seq: &str) -> u32 {
+    let mut curr = 0;
+    for ch in seq.chars() {
+        curr += ch as u32;
+        curr *= 17;
+        curr %= 256;
+    }
+    curr
+}
+
+fn part1(data: &str) -> u32 {
+    let data: Vec<&str> = data.trim().split(',').collect();
+    data.into_iter().map(calculate_hash).sum()
 }
 
 #[cfg(test)]
@@ -26,6 +37,6 @@ mod tests {
         let data = load_file();
         let output = part1(&data);
 
-        assert_eq!(output, "");
+        assert_eq!(output, 1320);
     }
 }
