@@ -4,6 +4,8 @@ use std::{
     ops::Add,
 };
 
+use itertools::Itertools;
+
 const DATA_FILE: &str = "data.txt";
 
 fn main() {
@@ -41,7 +43,7 @@ const fn new_pt(x: i32, y: i32) -> Point {
     Point { x, y }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
 struct Ray {
     point: Point,
     direction: Directions,
@@ -93,37 +95,26 @@ fn create_mappings() -> Mapping {
 const DELTAS: [Point; 4] = [new_pt(0, -1), new_pt(0, 1), new_pt(-1, 0), new_pt(1, 0)];
 type Mapping = HashMap<char, HashMap<Directions, Vec<Directions>>>;
 
-// not really satisfying but still works weirdly enough
 fn get_energised_tiles(grid: &[Vec<char>], mut rays: VecDeque<Ray>, mappings: &Mapping) -> u32 {
     let mut energized = HashSet::new();
     let max_y = grid.len() as i32;
     let max_x = grid[0].len() as i32;
 
-    let max = max_x * max_y;
+    while !rays.is_empty() {
+        // unwrapping as ray cannot be empty in this loop
+        let mut ray = rays.pop_front().unwrap();
 
-    // Experimentally found number that does the trick if
-    // multiplied by the max elements present in grid
-    // Number needed to be increased to 80 to account for part 2
-    //
-    // Might not work for inputs larger than 110 x 110, which
-    // are this input's dimensions. But increasing the number
-    // would probably be fine to deal with larger grids
-    let magic_multiplier = 80;
-
-    for _ in 0..max * magic_multiplier {
-        let mut ray = match rays.pop_front() {
-            Some(ray) => ray,
-            None => break,
-        };
         // out of bounds
         if ray.point.y >= max_y || ray.point.x >= max_x || ray.point.y < 0 || ray.point.x < 0 {
             continue;
         }
 
+        if energized.contains(&ray) {
+            continue;
+        }
+        energized.insert(ray);
+
         let current = grid[ray.point.y as usize][ray.point.x as usize];
-
-        energized.insert(ray.point);
-
         if current == '.' {
             match ray.direction {
                 Up => ray.point.y -= 1,
@@ -147,7 +138,7 @@ fn get_energised_tiles(grid: &[Vec<char>], mut rays: VecDeque<Ray>, mappings: &M
             rays.push_front(new_ray);
         }
     }
-    energized.len() as u32
+    energized.iter().map(|ray| ray.point).unique().count() as u32
 }
 
 fn part2(data: &str) -> u32 {
@@ -166,7 +157,6 @@ fn part2(data: &str) -> u32 {
         let a = get_energised_tiles(&grid, rays, &mappings);
         max_energised = max_energised.max(a);
     }
-    println!("1/4 done");
 
     // bottom row
     for i in 0..grid[0].len() {
@@ -181,7 +171,6 @@ fn part2(data: &str) -> u32 {
         let a = get_energised_tiles(&grid, rays, &mappings);
         max_energised = max_energised.max(a);
     }
-    println!("2/4 done");
 
     // left column
     for i in 0..grid.len() {
@@ -194,7 +183,6 @@ fn part2(data: &str) -> u32 {
         max_energised = max_energised.max(a);
     }
 
-    println!("3/4 done");
     // right column
     for i in 0..grid.len() {
         let mut rays: VecDeque<Ray> = VecDeque::new();
