@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::{HashMap, HashSet, VecDeque},
     fs,
     ops::Add,
 };
@@ -93,18 +93,27 @@ fn create_mappings() -> Mapping {
 const DELTAS: [Point; 4] = [new_pt(0, -1), new_pt(0, 1), new_pt(-1, 0), new_pt(1, 0)];
 type Mapping = HashMap<char, HashMap<Directions, Vec<Directions>>>;
 
-fn move_rays(
-    grid: &[Vec<char>],
-    energized: &mut HashSet<Point>,
-    rays: Vec<Ray>,
-    mappings: &Mapping,
-) -> Vec<Ray> {
+// not really satisfying but still works weirdly enough
+fn get_energised_tiles(grid: &[Vec<char>], mut rays: VecDeque<Ray>, mappings: &Mapping) -> u32 {
+    let mut energized = HashSet::new();
     let max_y = grid.len() as i32;
     let max_x = grid[0].len() as i32;
 
-    let mut new_rays = Vec::new();
+    let max = max_x * max_y;
 
-    for mut ray in rays {
+    // Experimentally found number that does the trick if
+    // multiplied by the max elements present in grid
+    //
+    // Might not work for inputs larger than 110 x 110, which
+    // are this input's dimensions. But increasing the number
+    // would probably be fine to deal with larger grids
+    let magic_multiplier = 30;
+
+    for _ in 0..max * magic_multiplier {
+        let mut ray = match rays.pop_front() {
+            Some(ray) => ray,
+            None => break,
+        };
         // out of bounds
         if ray.point.y >= max_y || ray.point.x >= max_x || ray.point.y < 0 || ray.point.x < 0 {
             continue;
@@ -112,11 +121,7 @@ fn move_rays(
 
         let current = grid[ray.point.y as usize][ray.point.x as usize];
 
-        if energized.contains(&ray.point) && current == '.' {
-            continue;
-        } else {
-            energized.insert(ray.point);
-        }
+        energized.insert(ray.point);
 
         if current == '.' {
             match ray.direction {
@@ -125,7 +130,8 @@ fn move_rays(
                 Left => ray.point.x -= 1,
                 Right => ray.point.x += 1,
             }
-            new_rays.push(ray);
+
+            rays.push_back(ray);
             continue;
         }
 
@@ -137,28 +143,22 @@ fn move_rays(
                 point: ray.point + delta,
                 direction: *dir,
             };
-            new_rays.push(new_ray);
+            rays.push_front(new_ray);
         }
     }
-    new_rays
+    energized.len() as u32
 }
 
 fn part1(data: &str) -> u32 {
     let grid: Vec<Vec<char>> = data.lines().map(|line| line.chars().collect()).collect();
-    let mut energized: HashSet<Point> = HashSet::new();
-    let mut rays: Vec<Ray> = Vec::new();
-    rays.push(Ray {
+    let mut rays: VecDeque<Ray> = VecDeque::new();
+    rays.push_back(Ray {
         point: Point { y: 0, x: 0 },
         direction: Right,
     });
 
     let mappings: Mapping = create_mappings();
-
-    while !rays.is_empty() {
-        rays = move_rays(&grid, &mut energized, rays, &mappings);
-        dbg!(&rays);
-    }
-    energized.len() as u32
+    get_energised_tiles(&grid, rays, &mappings)
 }
 
 #[cfg(test)]
