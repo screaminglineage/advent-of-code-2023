@@ -48,7 +48,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "day_5"
+name = "day_05"
 version = "0.1.0"
 dependencies = [
  "rayon",
