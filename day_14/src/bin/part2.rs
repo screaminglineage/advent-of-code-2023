@@ -55,7 +55,7 @@ fn part2(data: &str) -> u32 {
 
     let cycles = 1000000000;
     // let cycles = 1000;
-    for i in 0..cycles {
+    for _ in 0..cycles {
         // println!("Cycle {}", i + 1);
         for _ in 0..4 {
             roll_rocks(&mut platform);
