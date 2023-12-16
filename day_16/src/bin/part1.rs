@@ -1,4 +1,7 @@
-use std::{collections::HashSet, fs};
+use std::{
+    collections::{HashMap, HashSet},
+    fs,
+};
 
 const DATA_FILE: &str = "data.txt";
 
@@ -8,18 +11,25 @@ fn main() {
     println!("Part 1: {output}");
 }
 
+#[derive(PartialEq, Eq, Hash, Debug, Copy, Clone)]
 enum Directions {
-    Up,
+    Up = 0,
     Down,
     Left,
     Right,
 }
 
+#[derive(Debug, Copy, Clone)]
 struct Point {
     y: i32,
     x: i32,
 }
 
+fn new_pt(x: i32, y: i32) -> Point {
+    Point { x, y }
+}
+
+#[derive(Debug, Copy, Clone)]
 struct Ray {
     point: Point,
     direction: Directions,
@@ -31,7 +41,7 @@ fn move_rays(grid: &[Vec<char>], energized: &mut HashSet<Point>, rays: Vec<Ray>)
     let max_y = grid.len() as i32;
     let max_x = grid[0].len() as i32;
 
-    let new_rays = Vec::new();
+    let mut new_rays = Vec::new();
 
     for mut ray in rays {
         match ray.direction {
@@ -46,11 +56,13 @@ fn move_rays(grid: &[Vec<char>], energized: &mut HashSet<Point>, rays: Vec<Ray>)
             continue;
         }
 
-        match ray.direction {
-            _ => (),
+        let current = grid[ray.point.y as usize][ray.point.x as usize];
+        if current == '.' {
+            new_rays.push(ray);
+            continue;
         }
 
-        new_rays.push(ray);
+        // need to change direction of ray
     }
     new_rays
 }
@@ -63,6 +75,47 @@ fn part1(data: &str) -> u32 {
         point: Point { y: 0, x: 0 },
         direction: Right,
     });
+
+    let deltas = [new_pt(0, -1), new_pt(0, 1), new_pt(-1, 0), new_pt(1, 0)];
+    let mappings: HashMap<char, HashMap<Directions, Vec<Directions>>> = HashMap::from([
+        (
+            '|',
+            HashMap::from([
+                (Up, vec![Up]),
+                (Down, vec![Down]),
+                (Left, vec![Up, Down]),
+                (Right, vec![Up, Down]),
+            ]),
+        ),
+        (
+            '-',
+            HashMap::from([
+                (Up, vec![Left, Right]),
+                (Down, vec![Left, Right]),
+                (Left, vec![Left]),
+                (Right, vec![Right]),
+            ]),
+        ),
+        (
+            '/',
+            HashMap::from([
+                (Up, vec![Right]),
+                (Down, vec![Left]),
+                (Left, vec![Down]),
+                (Right, vec![Up]),
+            ]),
+        ),
+        (
+            '\\',
+            HashMap::from([
+                (Up, vec![Left]),
+                (Down, vec![Right]),
+                (Left, vec![Up]),
+                (Right, vec![Down]),
+            ]),
+        ),
+    ]);
+
     let rays = move_rays(&grid, &mut energized, rays);
     0
 }
