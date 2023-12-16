@@ -103,11 +103,12 @@ fn get_energised_tiles(grid: &[Vec<char>], mut rays: VecDeque<Ray>, mappings: &M
 
     // Experimentally found number that does the trick if
     // multiplied by the max elements present in grid
+    // Number needed to be increased to 80 to account for part 2
     //
     // Might not work for inputs larger than 110 x 110, which
     // are this input's dimensions. But increasing the number
     // would probably be fine to deal with larger grids
-    let magic_multiplier = 30;
+    let magic_multiplier = 80;
 
     for _ in 0..max * magic_multiplier {
         let mut ray = match rays.pop_front() {
@@ -165,6 +166,7 @@ fn part2(data: &str) -> u32 {
         let a = get_energised_tiles(&grid, rays, &mappings);
         max_energised = max_energised.max(a);
     }
+    println!("1/4 done");
 
     // bottom row
     for i in 0..grid[0].len() {
@@ -179,6 +181,7 @@ fn part2(data: &str) -> u32 {
         let a = get_energised_tiles(&grid, rays, &mappings);
         max_energised = max_energised.max(a);
     }
+    println!("2/4 done");
 
     // left column
     for i in 0..grid.len() {
@@ -191,6 +194,7 @@ fn part2(data: &str) -> u32 {
         max_energised = max_energised.max(a);
     }
 
+    println!("3/4 done");
     // right column
     for i in 0..grid.len() {
         let mut rays: VecDeque<Ray> = VecDeque::new();
