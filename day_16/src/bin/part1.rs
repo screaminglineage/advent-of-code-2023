@@ -105,22 +105,26 @@ fn move_rays(
     let mut new_rays = Vec::new();
 
     for mut ray in rays {
-        energized.insert(ray.point);
-
-        match ray.direction {
-            Up => ray.point.y -= 1,
-            Down => ray.point.y += 1,
-            Left => ray.point.x -= 1,
-            Right => ray.point.x += 1,
-        }
-
         // out of bounds
         if ray.point.y >= max_y || ray.point.x >= max_x || ray.point.y < 0 || ray.point.x < 0 {
             continue;
         }
 
         let current = grid[ray.point.y as usize][ray.point.x as usize];
+
+        if energized.contains(&ray.point) && current == '.' {
+            continue;
+        } else {
+            energized.insert(ray.point);
+        }
+
         if current == '.' {
+            match ray.direction {
+                Up => ray.point.y -= 1,
+                Down => ray.point.y += 1,
+                Left => ray.point.x -= 1,
+                Right => ray.point.x += 1,
+            }
             new_rays.push(ray);
             continue;
         }
