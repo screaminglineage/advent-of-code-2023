@@ -1,7 +1,6 @@
 use std::fs;
 
 const DATA_FILE: &str = "data.txt";
-const TEST_DATA_FILE: &str = "test_data.txt";
 
 fn main() {
     let input = fs::read_to_string(DATA_FILE).unwrap();
@@ -21,6 +20,7 @@ fn part1(data: &str) -> i32 {
 
 #[cfg(test)]
 mod tests {
+    const TEST_DATA_FILE: &str = "test_data.txt";
     use super::*;
 
     fn load_file() -> String {
