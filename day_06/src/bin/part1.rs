@@ -39,6 +39,7 @@ fn part1(data: &str) -> u32 {
 }
 
 // alternate version using functional style
+#[allow(unused)]
 fn part1_alternate(data: &str) -> u32 {
     let lines: Vec<&str> = data.lines().collect();
     let times = line_to_nums(lines[0]);

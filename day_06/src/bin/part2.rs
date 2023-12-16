@@ -1,4 +1,4 @@
-use std::{fs, iter::zip};
+use std::fs;
 
 const DATA_FILE: &str = "data.txt";
 
