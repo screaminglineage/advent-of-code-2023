@@ -21,10 +21,9 @@ fn part1(data: &str) -> u32 {
     data.lines()
         .map(|card| {
             let nums = card.split(": ").last().unwrap();
-            let mut nums_it = nums.split("| ").into_iter();
+            let mut nums_it = nums.split("| ");
             let card_nums = nums_from_line(&mut nums_it);
             let winnning_nums = nums_from_line(&mut nums_it);
-            println!("{card_nums:?} {winnning_nums:?}\n");
 
             let win_count = card_nums
                 .iter()

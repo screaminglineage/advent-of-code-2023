@@ -47,7 +47,7 @@ struct ParsedLine {
 fn parse_card(card_line: &str) -> ParsedLine {
     let card_id = get_card_num(card_line);
     let nums = card_line.split(": ").last().unwrap();
-    let mut nums_it = nums.split("| ").into_iter();
+    let mut nums_it = nums.split("| ");
     let card_nums = nums_from_line(&mut nums_it);
     let winnning_nums = nums_from_line(&mut nums_it);
     ParsedLine {
