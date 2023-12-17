@@ -44,7 +44,7 @@ fn get_ranges(line: &str) -> Vec<RangeMap> {
 }
 
 fn get_seeds(data: &[&str]) -> Vec<u64> {
-    data.get(0)
+    data.first()
         .unwrap()
         .split(": ")
         .last()
@@ -57,14 +57,10 @@ fn get_seeds(data: &[&str]) -> Vec<u64> {
 fn map_items(item: u64, maps: &HashMap<&str, Vec<RangeMap>>, map: &str) -> u64 {
     let map_ranges = maps.get(map).unwrap();
 
-    if let Some(range) = map_ranges
-        .iter()
-        .filter(|range| range.source.contains(&item))
-        .next()
-    {
-        return (item as i64 - (range.source.start as i64 - range.dest.start as i64)) as u64;
+    if let Some(range) = map_ranges.iter().find(|range| range.source.contains(&item)) {
+        (item as i64 - (range.source.start as i64 - range.dest.start as i64)) as u64
     } else {
-        return item;
+        item
     }
 }
 
@@ -72,7 +68,6 @@ fn part1(data: &str) -> u64 {
     let mut data_lines: Vec<&str> = data.split("\n\n").collect();
     let seeds = get_seeds(&data_lines);
     let data_lines: Vec<&str> = data_lines.drain(1..).collect();
-    dbg!(&seeds);
 
     let mut maps: HashMap<&str, Vec<RangeMap>> = HashMap::new();
     for line in data_lines {
