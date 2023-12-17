@@ -29,12 +29,11 @@ fn is_schematic(schema: &[Vec<char>], row: usize, col: usize) -> bool {
         }
     }
 
-    println!("{neighbours:?}");
     neighbours.iter().any(|c| is_symbol(*c))
 }
 
 fn add_to_sum(sum: &mut u32, num: &[(usize, usize, &char)], schema: &[Vec<char>]) {
-    if num.iter().any(|(x, y, _)| is_schematic(&schema, *x, *y)) {
+    if num.iter().any(|(x, y, _)| is_schematic(schema, *x, *y)) {
         let s = num.iter().map(|(_, _, c)| **c).collect::<String>();
         *sum += s.parse::<u32>().unwrap();
     }
