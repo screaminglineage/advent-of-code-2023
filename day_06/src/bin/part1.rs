@@ -9,7 +9,7 @@ fn main() {
 }
 
 fn line_to_nums(line: &str) -> Vec<u32> {
-    line.split(":")
+    line.split(':')
         .last()
         .unwrap()
         .split_whitespace()
@@ -46,7 +46,6 @@ fn part1_alternate(data: &str) -> u32 {
     let distances = line_to_nums(lines[1]);
 
     zip(times, distances)
-        .into_iter()
         .map(|(time, dist)| {
             (1..time)
                 .filter(|i| {

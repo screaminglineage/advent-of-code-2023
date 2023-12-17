@@ -9,7 +9,7 @@ fn main() {
 }
 
 fn line_to_nums(line: &str) -> u64 {
-    line.split(":")
+    line.split(':')
         .last()
         .unwrap()
         .chars()
