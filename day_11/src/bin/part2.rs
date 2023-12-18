@@ -68,8 +68,8 @@ fn solve(space: &[Vec<char>], expansion: u32) -> u64 {
                             x: x2 as i32,
                             y: y2 as i32,
                         };
-                        let empty_rows = count_empty_rows(&space, &point_1, &point_2);
-                        let empty_cols = count_empty_cols(&space, &point_1, &point_2);
+                        let empty_rows = count_empty_rows(space, &point_1, &point_2);
+                        let empty_cols = count_empty_cols(space, &point_1, &point_2);
 
                         if col2 == '#' && point_1 != point_2 && !counted.contains(&point_2) {
                             let dist =

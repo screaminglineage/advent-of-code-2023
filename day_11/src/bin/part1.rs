@@ -87,7 +87,7 @@ fn part1(data: &str) -> u32 {
                         if col2 == '#' && point_1 != point_2 && !counted.contains(&point_2) {
                             let dist =
                                 point_2.x.abs_diff(point_1.x) + point_2.y.abs_diff(point_1.y);
-                            sum += dist as u32;
+                            sum += dist;
                         }
                     }
                 }
