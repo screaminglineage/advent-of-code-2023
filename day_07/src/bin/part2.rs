@@ -95,11 +95,9 @@ fn part2(data: &str) -> u32 {
                 .map(|(k, _v)| k)
                 .unwrap();
 
-            card_count.remove(&Card::Joker).and_then(|j_count| {
-                card_count
-                    .get_mut(&max_card)
-                    .and_then(|c| Some(*c += j_count))
-            });
+            card_count
+                .remove(&Card::Joker)
+                .map(|j_count| card_count.get_mut(&max_card).map(|c| *c += j_count));
         }
 
         if card_count.values().any(|&x| x == 5) {
