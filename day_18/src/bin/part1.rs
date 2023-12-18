@@ -1,4 +1,4 @@
-use std::{collections::HashSet, fs};
+use std::{collections::HashSet, fs, thread::current};
 
 const DATA_FILE: &str = "data.txt";
 
@@ -8,24 +8,29 @@ fn main() {
     println!("Part 1: {output}");
 }
 
-fn calc_edges(directions: &[(char, u32)]) -> u32 {
+fn calc_edges(directions: &[(char, i32)]) -> (HashSet<(i32, i32)>, u32) {
     let mut total = 0;
-    let visited: HashSet<(i32, i32)> = HashSet::new();
+    let mut visited: HashSet<(i32, i32)> = HashSet::new();
+
+    // current is in the order (y, x)
     let mut current = (0, 0);
+
     for (dir, count) in directions {
         match dir {
-            'U' => (),
-            'D' => (),
-            'L' => (),
-            'R' => (),
-            _ => unreachable!(),
+            'U' => current.0 -= count,
+            'D' => current.0 += count,
+            'L' => current.1 -= count,
+            'R' => current.1 += count,
+            a => panic!("got {a}"),
         }
+        visited.insert(current);
+        total += *count as u32;
     }
-    total
+    (visited, total)
 }
 
 fn part1(data: &str) -> u32 {
-    let directions: Vec<(char, u32)> = data
+    let directions: Vec<(char, i32)> = data
         .lines()
         .map(|line| {
             let mut l = line.split_whitespace();
@@ -37,12 +42,12 @@ fn part1(data: &str) -> u32 {
                     .next()
                     .unwrap()
                     .to_digit(10)
-                    .unwrap(),
+                    .unwrap() as i32,
             )
         })
         .collect();
 
-    dbg!(calc_edges(&directions));
+    let (visited, edges) = calc_edges(&directions);
 
     0
 }
@@ -59,9 +64,27 @@ mod tests {
     #[test]
     fn outer_edge() {
         let data = load_file();
-        let output = calc_edges(&[('A', 32)]);
 
-        assert_eq!(output, 38);
+        let output = calc_edges(
+            &data
+                .lines()
+                .map(|line| {
+                    let mut l = line.split_whitespace();
+                    (
+                        l.next().unwrap().chars().next().unwrap(),
+                        l.next()
+                            .unwrap()
+                            .chars()
+                            .next()
+                            .unwrap()
+                            .to_digit(10)
+                            .unwrap() as i32,
+                    )
+                })
+                .collect::<Vec<(char, i32)>>(),
+        );
+
+        assert_eq!(output.1, 38);
     }
 
     #[test]
