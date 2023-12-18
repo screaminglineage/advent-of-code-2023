@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs, panic::Location};
+use std::{collections::HashMap, fs};
 
 const DATA_FILE: &str = "data.txt";
 
@@ -18,7 +18,7 @@ fn part1(data: &str) -> u32 {
             .split(" = (")
             .last()
             .unwrap()
-            .split(")")
+            .split(')')
             .next()
             .unwrap()
             .split_once(", ")

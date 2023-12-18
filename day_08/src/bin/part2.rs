@@ -16,7 +16,7 @@ fn count_steps(
     let mut count = 0;
     let mut curr = node;
     loop {
-        if curr.ends_with("Z") {
+        if curr.ends_with('Z') {
             return count;
         }
 
@@ -55,7 +55,7 @@ fn part2(data: &str) -> u64 {
             .split(" = (")
             .last()
             .unwrap()
-            .split(")")
+            .split(')')
             .next()
             .unwrap()
             .split_once(", ")
