@@ -24,6 +24,12 @@ struct WorkflowRules<'a> {
 
 type Part = HashMap<char, u32>;
 
+fn apply_workflow(parts: Vec<Part>, workflows: HashMap<&str, WorkflowRules>) -> u32 {
+    let accepted: Vec<Part> = Vec::new();
+
+    accepted.iter().map(|part| part.values().sum::<u32>()).sum()
+}
+
 fn part1(data: &str) -> u32 {
     let (workflows, parts) = data.split_once("\n\n").unwrap();
     let parts: Vec<Part> = parts
@@ -72,9 +78,7 @@ fn part1(data: &str) -> u32 {
         })
         .collect();
 
-    dbg!(workflows);
-
-    0
+    apply_workflow(parts, workflows)
 }
 
 #[cfg(test)]
