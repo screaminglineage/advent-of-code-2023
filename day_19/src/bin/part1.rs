@@ -25,7 +25,31 @@ struct WorkflowRules<'a> {
 type Part = HashMap<char, u32>;
 
 fn apply_workflow(parts: Vec<Part>, workflows: HashMap<&str, WorkflowRules>) -> u32 {
-    let accepted: Vec<Part> = Vec::new();
+    let mut accepted: Vec<Part> = Vec::new();
+
+    for part in parts {
+        dbg!(&part);
+        let mut workflow_name = "in";
+
+        loop {
+            if workflow_name == "A" {
+                accepted.push(part);
+                break;
+            } else if workflow_name == "R" {
+                break;
+            }
+
+            let workflow = workflows.get(workflow_name).unwrap();
+            for rule in &workflow.rules {
+                let applicant = part.get(&rule.category).unwrap();
+                match rule.op {
+                    '>' if *applicant > rule.num => workflow_name = workflow.next,
+                    '<' if *applicant < rule.num => workflow_name = workflow.next,
+                    _ => break,
+                }
+            }
+        }
+    }
 
     accepted.iter().map(|part| part.values().sum::<u32>()).sum()
 }
