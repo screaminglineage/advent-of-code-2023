@@ -1,4 +1,4 @@
-use std::fs;
+use std::{collections::HashMap, fs};
 
 const DATA_FILE: &str = "data.txt";
 
@@ -8,7 +8,72 @@ fn main() {
     println!("Part 1: {output}");
 }
 
+#[derive(Debug)]
+struct Rule<'a> {
+    category: char,
+    op: char,
+    num: u32,
+    next: &'a str,
+}
+
+#[derive(Debug)]
+struct WorkflowRules<'a> {
+    rules: Vec<Rule<'a>>,
+    next: &'a str,
+}
+
+type Part = HashMap<char, u32>;
+
 fn part1(data: &str) -> u32 {
+    let (workflows, parts) = data.split_once("\n\n").unwrap();
+    let parts: Vec<Part> = parts
+        .lines()
+        .map(|line| {
+            let parts = line.split('{').last().unwrap().split('}').next().unwrap();
+            parts
+                .split(',')
+                .map(|categ| {
+                    let (c, num) = categ.split_once('=').unwrap();
+                    (c.chars().next().unwrap(), num.parse().unwrap())
+                })
+                .collect::<HashMap<char, u32>>()
+        })
+        .collect();
+
+    let workflows: HashMap<&str, WorkflowRules> = workflows
+        .lines()
+        .map(|line| {
+            let (name, rest) = line.split_once('{').unwrap();
+            let rest: Vec<&str> = rest.split('}').next().unwrap().split(',').collect();
+
+            let mut rules = Vec::new();
+            for rule in rest.iter().take(rest.len() - 1) {
+                let (rule, next) = rule.split_once(':').unwrap();
+                let mut rule_it = rule.chars();
+
+                let category = rule_it.next().unwrap();
+                let op = rule_it.next().unwrap();
+                let num = rule_it.collect::<String>().parse::<u32>().unwrap();
+                rules.push(Rule {
+                    category,
+                    op,
+                    num,
+                    next,
+                });
+            }
+            let next_workflow = rest.last().unwrap();
+            (
+                name,
+                WorkflowRules {
+                    rules,
+                    next: next_workflow,
+                },
+            )
+        })
+        .collect();
+
+    dbg!(workflows);
+
     0
 }
 
