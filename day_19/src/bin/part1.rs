@@ -28,7 +28,6 @@ fn apply_workflow(parts: Vec<Part>, workflows: HashMap<&str, WorkflowRules>) -> 
     let mut accepted: Vec<Part> = Vec::new();
 
     for part in parts {
-        dbg!(&part);
         let mut workflow_name = "in";
 
         loop {
@@ -40,13 +39,26 @@ fn apply_workflow(parts: Vec<Part>, workflows: HashMap<&str, WorkflowRules>) -> 
             }
 
             let workflow = workflows.get(workflow_name).unwrap();
+
+            let mut rules_matched = false;
             for rule in &workflow.rules {
                 let applicant = part.get(&rule.category).unwrap();
                 match rule.op {
-                    '>' if *applicant > rule.num => workflow_name = workflow.next,
-                    '<' if *applicant < rule.num => workflow_name = workflow.next,
-                    _ => break,
+                    '>' if *applicant > rule.num => {
+                        rules_matched = true;
+                        workflow_name = rule.next;
+                        break;
+                    }
+                    '<' if *applicant < rule.num => {
+                        rules_matched = true;
+                        workflow_name = rule.next;
+                        break;
+                    }
+                    _ => continue,
                 }
+            }
+            if !rules_matched {
+                workflow_name = workflow.next;
             }
         }
     }
