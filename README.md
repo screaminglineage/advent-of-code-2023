@@ -7,6 +7,7 @@ Advent of Code 2023 in Rust
 - [ ] Day 12
 - [ ] Day 13 (Part 2)
 - [ ] Day 14 (Part 2)
-- [ ] Day 17 (Part 2)
-- [ ] Day 19
+- [ ] Day 17
+- [ ] Day 18
+- [ ] Day 19 (Part 2)
 - [ ] Day 20
