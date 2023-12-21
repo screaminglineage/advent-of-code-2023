@@ -1,6 +1,7 @@
 use std::collections::HashSet;
+use std::fs;
+use std::iter;
 use std::ops::Add;
-use std::{collections::VecDeque, fs};
 
 const DATA_FILE: &str = "data.txt";
 
@@ -49,22 +50,20 @@ fn part1(data: &str) -> u32 {
     let grid: Vec<Vec<u8>> = data.lines().map(|line| line.bytes().collect()).collect();
 
     let start = start_pt(&grid);
-    dbg!(start);
     let directions: [Point; 4] = [new_pt(0, -1), new_pt(0, 1), new_pt(-1, 0), new_pt(1, 0)];
 
-    let mut points: VecDeque<Point> = VecDeque::new();
-    points.push_back(start);
+    let mut visited: Vec<HashSet<Point>> = Vec::new();
+    visited.push(HashSet::from_iter(iter::once(start)));
 
     let max_y = grid.len() as i32;
     let max_x = grid[0].len() as i32;
     let max_steps = 64;
 
-    for _ in 0..max_steps {
-        let len = points.len();
-        for _ in 0..len {
-            let current = points.pop_front().unwrap();
+    for step in 0..max_steps {
+        let current_step = visited[step].clone();
+        for point in current_step {
             for dir in directions {
-                let new_pt = current + dir;
+                let new_pt = point + dir;
 
                 if new_pt.x < 0 || new_pt.y < 0 || new_pt.x >= max_x || new_pt.y >= max_y {
                     continue;
@@ -74,13 +73,17 @@ fn part1(data: &str) -> u32 {
                     continue;
                 }
 
-                points.push_back(new_pt);
+                match visited.get_mut(step + 1) {
+                    Some(points) => {
+                        points.insert(new_pt);
+                    }
+                    None => visited.push(HashSet::from_iter(iter::once(new_pt))),
+                }
             }
         }
     }
 
-    let unique_points: HashSet<&Point> = HashSet::from_iter(points.iter());
-    unique_points.len() as u32
+    visited.last().unwrap().len() as u32
 }
 
 #[cfg(test)]
