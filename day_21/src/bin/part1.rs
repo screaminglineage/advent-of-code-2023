@@ -36,7 +36,7 @@ fn new_pt(x: i32, y: i32) -> Point {
 fn start_pt(grid: &[Vec<u8>]) -> Point {
     for (y, row) in grid.iter().enumerate() {
         for (x, &col) in row.iter().enumerate() {
-            if col == 'S' as u8 {
+            if col == b'S' {
                 return Point {
                     x: x as i32,
                     y: y as i32,
@@ -69,7 +69,7 @@ fn part1(data: &str, max_steps: usize) -> u32 {
                     continue;
                 }
 
-                if grid[new_pt.y as usize][new_pt.x as usize] == '#' as u8 {
+                if grid[new_pt.y as usize][new_pt.x as usize] == b'#' {
                     continue;
                 }
 
