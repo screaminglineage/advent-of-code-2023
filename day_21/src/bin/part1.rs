@@ -12,8 +12,8 @@ fn main() {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct Point {
-    x: i32,
     y: i32,
+    x: i32,
 }
 
 impl Add for Point {
@@ -28,7 +28,7 @@ impl Add for Point {
 }
 
 fn new_pt(x: i32, y: i32) -> Point {
-    Point { x, y }
+    Point { y, x }
 }
 
 fn start_pt(grid: &[Vec<u8>]) -> Point {
@@ -57,30 +57,30 @@ fn part1(data: &str) -> u32 {
 
     let max_y = grid.len() as i32;
     let max_x = grid[0].len() as i32;
-    let max_steps = 16;
+    let max_steps = 64;
 
     for _ in 0..max_steps {
-        let current = points.pop_front().unwrap();
-        for dir in directions {
-            let new_pt = current + dir;
+        let len = points.len();
+        for _ in 0..len {
+            let current = points.pop_front().unwrap();
+            for dir in directions {
+                let new_pt = current + dir;
 
-            if new_pt.x < 0 || new_pt.y < 0 || new_pt.x >= max_x || new_pt.y >= max_y {
-                continue;
+                if new_pt.x < 0 || new_pt.y < 0 || new_pt.x >= max_x || new_pt.y >= max_y {
+                    continue;
+                }
+
+                if grid[new_pt.y as usize][new_pt.x as usize] == '#' as u8 {
+                    continue;
+                }
+
+                points.push_back(new_pt);
             }
-
-            if grid[new_pt.y as usize][new_pt.x as usize] == '#' as u8 {
-                continue;
-            }
-
-            points.push_back(new_pt);
         }
     }
 
-    dbg!(points.len());
     let unique_points: HashSet<&Point> = HashSet::from_iter(points.iter());
-    dbg!(unique_points.len());
-
-    0
+    unique_points.len() as u32
 }
 
 #[cfg(test)]
