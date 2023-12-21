@@ -7,7 +7,8 @@ const DATA_FILE: &str = "data.txt";
 
 fn main() {
     let input = fs::read_to_string(DATA_FILE).unwrap();
-    let output = part1(&input);
+    let max_steps = 64;
+    let output = part1(&input, max_steps);
     println!("Part 1: {output}");
 }
 
@@ -46,7 +47,7 @@ fn start_pt(grid: &[Vec<u8>]) -> Point {
     unreachable!("should have a starting point")
 }
 
-fn part1(data: &str) -> u32 {
+fn part1(data: &str, max_steps: usize) -> u32 {
     let grid: Vec<Vec<u8>> = data.lines().map(|line| line.bytes().collect()).collect();
 
     let start = start_pt(&grid);
@@ -57,7 +58,6 @@ fn part1(data: &str) -> u32 {
 
     let max_y = grid.len() as i32;
     let max_x = grid[0].len() as i32;
-    let max_steps = 64;
 
     for step in 0..max_steps {
         let current_step = visited[step].clone();
@@ -98,7 +98,8 @@ mod tests {
     #[test]
     fn part1_works() {
         let data = load_file();
-        let output = part1(&data);
+        let max_steps = 6;
+        let output = part1(&data, max_steps);
 
         assert_eq!(output, 16);
     }
