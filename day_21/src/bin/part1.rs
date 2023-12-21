@@ -1,4 +1,6 @@
-use std::fs;
+use std::collections::HashSet;
+use std::ops::Add;
+use std::{collections::VecDeque, fs};
 
 const DATA_FILE: &str = "data.txt";
 
@@ -8,10 +10,25 @@ fn main() {
     println!("Part 1: {output}");
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct Point {
-    y: i32,
     x: i32,
+    y: i32,
+}
+
+impl Add for Point {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
+
+fn new_pt(x: i32, y: i32) -> Point {
+    Point { x, y }
 }
 
 fn start_pt(grid: &[Vec<u8>]) -> Point {
@@ -19,8 +36,8 @@ fn start_pt(grid: &[Vec<u8>]) -> Point {
         for (x, &col) in row.iter().enumerate() {
             if col == 'S' as u8 {
                 return Point {
-                    y: y as i32,
                     x: x as i32,
+                    y: y as i32,
                 };
             }
         }
@@ -31,7 +48,37 @@ fn start_pt(grid: &[Vec<u8>]) -> Point {
 fn part1(data: &str) -> u32 {
     let grid: Vec<Vec<u8>> = data.lines().map(|line| line.bytes().collect()).collect();
 
-    dbg!(start_pt(&grid));
+    let start = start_pt(&grid);
+    dbg!(start);
+    let directions: [Point; 4] = [new_pt(0, -1), new_pt(0, 1), new_pt(-1, 0), new_pt(1, 0)];
+
+    let mut points: VecDeque<Point> = VecDeque::new();
+    points.push_back(start);
+
+    let max_y = grid.len() as i32;
+    let max_x = grid[0].len() as i32;
+    let max_steps = 16;
+
+    for _ in 0..max_steps {
+        let current = points.pop_front().unwrap();
+        for dir in directions {
+            let new_pt = current + dir;
+
+            if new_pt.x < 0 || new_pt.y < 0 || new_pt.x >= max_x || new_pt.y >= max_y {
+                continue;
+            }
+
+            if grid[new_pt.y as usize][new_pt.x as usize] == '#' as u8 {
+                continue;
+            }
+
+            points.push_back(new_pt);
+        }
+    }
+
+    dbg!(points.len());
+    let unique_points: HashSet<&Point> = HashSet::from_iter(points.iter());
+    dbg!(unique_points.len());
 
     0
 }
