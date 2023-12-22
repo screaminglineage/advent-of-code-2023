@@ -1,4 +1,4 @@
-use std::{collections::HashSet, fs, thread::current};
+use std::{collections::HashSet, fs};
 
 const DATA_FILE: &str = "data.txt";
 
