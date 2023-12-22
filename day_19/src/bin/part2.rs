@@ -23,7 +23,7 @@ struct WorkflowRules<'a> {
 
 type Part = HashMap<char, Range<u32>>;
 
-fn apply_workflow(mut part: Part, workflows: HashMap<&str, WorkflowRules>) -> Vec<Range<u32>> {
+fn apply_workflow(part: Part, workflows: HashMap<&str, WorkflowRules>) -> Vec<Range<u32>> {
     let mut workflow_name = "in";
 
     let mut result = Vec::new();
