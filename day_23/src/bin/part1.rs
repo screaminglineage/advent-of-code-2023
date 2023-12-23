@@ -64,14 +64,31 @@ fn longest_hike(grid: &[Vec<u8>], start: &Point, end: &Point) -> u32 {
             if visited.contains(&(i, new_point)) {
                 continue;
             }
-            visited.insert((i, new_point));
 
             match grid[new_point.y as usize][new_point.x as usize] {
-                b'.' => points.push((dist + 1, new_point)),
-                b'^' if i == 0 => points.push((dist + 1, new_point)),
-                b'v' if i == 1 => points.push((dist + 1, new_point)),
-                b'<' if i == 2 => points.push((dist + 1, new_point)),
-                b'>' if i == 3 => points.push((dist + 1, new_point)),
+                b'.' => {
+                    points.push((dist + 1, new_point));
+                    visited.insert((i, new_point));
+                }
+                b'^' if i == 0 => {
+                    points.push((dist + 1, new_point));
+                    visited.insert((i, new_point));
+                }
+
+                b'v' if i == 1 => {
+                    points.push((dist + 1, new_point));
+                    visited.insert((i, new_point));
+                }
+
+                b'<' if i == 2 => {
+                    points.push((dist + 1, new_point));
+                    visited.insert((i, new_point));
+                }
+
+                b'>' if i == 3 => {
+                    points.push((dist + 1, new_point));
+                    visited.insert((i, new_point));
+                }
 
                 b'#' => (),
                 _ => (),
