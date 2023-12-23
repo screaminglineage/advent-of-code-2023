@@ -1,4 +1,8 @@
-use std::{fs, ops::Add};
+use std::{
+    collections::{BinaryHeap, HashSet},
+    fs,
+    ops::Add,
+};
 
 const DATA_FILE: &str = "data.txt";
 
@@ -8,7 +12,7 @@ fn main() {
     println!("Part 1: {output}");
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct Point {
     y: i32,
     x: i32,
@@ -25,11 +29,27 @@ impl Add for Point {
     }
 }
 
-fn new_pt(x: i32, y: i32) -> Point {
+const fn new_pt(x: i32, y: i32) -> Point {
     Point { y, x }
 }
 
+// up, down, left, right
+const DIRS: [Point; 4] = [new_pt(0, -1), new_pt(0, 1), new_pt(-1, 0), new_pt(1, 0)];
+
 fn longest_hike(grid: &[Vec<u8>], start: &Point, end: &Point) -> u32 {
+    let mut visited: HashSet<&Point> = HashSet::new();
+    let mut points: BinaryHeap<(u32, &Point)> = BinaryHeap::new();
+
+    points.push((0, start));
+    visited.insert(start);
+
+    while !points.is_empty() {
+        let (dist, current) = points.pop().unwrap();
+        if current == end {
+            break;
+        }
+    }
+
     todo!()
 }
 
@@ -40,7 +60,7 @@ fn part1(data: &str) -> u32 {
     let max_x = grid[0].len() as i32;
     let end = new_pt(max_x - 2, max_y - 1);
 
-    0
+    longest_hike(&grid, &start, &end)
 }
 
 #[cfg(test)]
