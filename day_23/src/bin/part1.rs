@@ -1,5 +1,5 @@
 use std::{
-    collections::{BinaryHeap, HashSet},
+    collections::{BinaryHeap, HashSet, VecDeque},
     fs,
     ops::Add,
 };
@@ -37,18 +37,18 @@ const fn new_pt(x: i32, y: i32) -> Point {
 const DIRS: [Point; 4] = [new_pt(0, -1), new_pt(0, 1), new_pt(-1, 0), new_pt(1, 0)];
 
 fn longest_hike(grid: &[Vec<u8>], start: &Point, end: &Point) -> u32 {
-    let mut visited: HashSet<(usize, Point)> = HashSet::new();
-    let mut points: BinaryHeap<(u32, Point)> = BinaryHeap::new();
+    let mut visited: HashSet<Point> = HashSet::new();
+    let mut points: VecDeque<(u32, Point, HashSet<Point>)> = VecDeque::new();
     let mut dists = Vec::new();
 
-    points.push((0, *start));
-    visited.insert((1, *start));
+    visited.insert(*start);
+    points.push_back((0, *start, visited.clone()));
 
     let max_y = grid.len() as i32;
     let max_x = grid[0].len() as i32;
 
     while !points.is_empty() {
-        let (dist, current) = points.pop().unwrap();
+        let (dist, current, mut visited) = points.pop_front().unwrap();
         if current == *end {
             dists.push(dist);
             continue;
@@ -61,7 +61,7 @@ fn longest_hike(grid: &[Vec<u8>], start: &Point, end: &Point) -> u32 {
                 continue;
             }
 
-            if visited.contains(&(i, new_point)) {
+            if visited.contains(&new_point) {
                 continue;
             }
 
@@ -72,16 +72,12 @@ fn longest_hike(grid: &[Vec<u8>], start: &Point, end: &Point) -> u32 {
                 || ch == b'<' && i == 2
                 || ch == b'>' && i == 3
             {
-                points.push((dist + 1, new_point));
-                visited.insert((i, new_point));
+                visited.insert(new_point);
+                points.push_back((dist + 1, new_point, visited.clone()));
             }
         }
-        // dbg!(&points);
     }
-
-    dbg!(visited.len());
-    dbg!(dists);
-    todo!()
+    *dists.iter().max().unwrap() as u32
 }
 
 fn part1(data: &str) -> u32 {
