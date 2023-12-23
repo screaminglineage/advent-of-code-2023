@@ -37,19 +37,51 @@ const fn new_pt(x: i32, y: i32) -> Point {
 const DIRS: [Point; 4] = [new_pt(0, -1), new_pt(0, 1), new_pt(-1, 0), new_pt(1, 0)];
 
 fn longest_hike(grid: &[Vec<u8>], start: &Point, end: &Point) -> u32 {
-    let mut visited: HashSet<&Point> = HashSet::new();
-    let mut points: BinaryHeap<(u32, &Point)> = BinaryHeap::new();
+    let mut visited: HashSet<(usize, Point)> = HashSet::new();
+    let mut points: BinaryHeap<(u32, Point)> = BinaryHeap::new();
+    let mut dists = Vec::new();
 
-    points.push((0, start));
-    visited.insert(start);
+    points.push((0, *start));
+    visited.insert((1, *start));
+
+    let max_y = grid.len() as i32;
+    let max_x = grid[0].len() as i32;
 
     while !points.is_empty() {
         let (dist, current) = points.pop().unwrap();
-        if current == end {
-            break;
+        if current == *end {
+            dists.push(dist);
+            continue;
         }
+
+        for (i, dir) in DIRS.iter().enumerate() {
+            let new_point = current + *dir;
+
+            if new_point.x < 0 || new_point.y < 0 || new_point.x >= max_x || new_point.y >= max_y {
+                continue;
+            }
+
+            if visited.contains(&(i, new_point)) {
+                continue;
+            }
+            visited.insert((i, new_point));
+
+            match grid[new_point.y as usize][new_point.x as usize] {
+                b'.' => points.push((dist + 1, new_point)),
+                b'^' if i == 0 => points.push((dist + 1, new_point)),
+                b'v' if i == 1 => points.push((dist + 1, new_point)),
+                b'<' if i == 2 => points.push((dist + 1, new_point)),
+                b'>' if i == 3 => points.push((dist + 1, new_point)),
+
+                b'#' => (),
+                _ => (),
+            }
+        }
+        // dbg!(&points);
     }
 
+    dbg!(visited.len());
+    dbg!(dists);
     todo!()
 }
 
