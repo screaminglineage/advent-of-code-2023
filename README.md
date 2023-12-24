@@ -13,3 +13,4 @@ Advent of Code 2023 in Rust
 - [ ] Day 20
 - [ ] Day 21 (Part 2)
 - [ ] Day 22
+- [ ] Day 23 (Part 2)

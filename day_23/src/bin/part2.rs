@@ -51,6 +51,7 @@ fn longest_hike(grid: &[Vec<u8>], start: &Point, end: &Point) -> u32 {
         let (dist, current, mut visited) = points.pop_front().unwrap();
         if current == *end {
             dists.push(dist);
+            println!("got dist...");
             continue;
         }
 
